@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Usuário - Igreja Adere Vidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header e Navegação */
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .header-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+        }
+        
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Menu de Navegação */
+        nav {
+            background-color: #2c3e50;
+            padding: 0 20px;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .menu {
+            list-style-type: none;
+            display: flex;
+        }
+        
+        .menu-item {
+            position: relative;
+        }
+        
+        .menu-item > a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-item > a:hover {
+            background-color: #34495e;
+        }
+        
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 5px 5px;
+            display: none;
+            z-index: 10;
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .menu-item:hover .dropdown {
+            display: block;
+        }
+        
+        /* Conteúdo Principal */
+        .main-content {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .page-title {
+            color: #1a2a6c;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #24378a, #c52d2d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+            margin-right: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        /* Tabela de usuários */
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .users-table th, .users-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .users-table th {
+            background-color: #f8f9fa;
+            color: #1a2a6c;
+            font-weight: 600;
+        }
+        
+        .users-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #1a2a6c;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .action-btn.delete {
+            color: #b21f1f;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #1a2a6c;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+            
+            .menu {
+                flex-direction: column;
+            }
+            
+            .dropdown {
+                position: static;
+                width: 100%;
+                display: none;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .menu-item:hover .dropdown {
+                display: none;
+            }
+            
+            .menu-item.active .dropdown {
+                display: block;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .btn-secondary {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
+                <div class="header-title">Igreja Adere Vidas</div>
+            </div>
+            <div class="user-info">
+                <span>Bem-vindo, Administrador</span>
+                <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="nav-container">
+            <ul class="menu">
+                <li class="menu-item">
+                    <a href="main.html"><i class="fas fa-home"></i> Início</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-church"></i> Ministérios</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-calendar-alt"></i> Eventos</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-users"></i> Membros</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-file-alt"></i> Relatórios</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-cogs"></i> Configurações</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-database"></i> Cadastro <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown">
+                        <a href="add_usuario.html" class="dropdown-item"><i class="fas fa-user"></i> Usuário</a>
+                        <a href="#" class="dropdown-item"><i class="fas fa-id-card"></i> Perfil</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <h1 class="page-title">Cadastro de Usuário</h1>
+        
+        <div class="alert alert-success" id="success-alert">
+            <i class="fas fa-check-circle"></i> Usuário cadastrado com sucesso!
+        </div>
+        
+        <div class="alert alert-error" id="error-alert">
+            <i class="fas fa-exclamation-circle"></i> <span id="error-message"></span>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Salvando usuário...</p>
+        </div>
+        
+        <div class="form-card">
+            <form id="user-form">
+                <div class="form-group">
+                    <label for="username">Nome de Usuário *</label>
+                    <input type="text" id="username" class="form-control" placeholder="Digite o nome de usuário" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fullname">Nome Completo *</label>
+                    <input type="text" id="fullname" class="form-control" placeholder="Digite o nome completo" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha *</label>
+                    <div class="password-container">
+                        <input type="password" id="password" class="form-control" placeholder="Digite a senha" required>
+                        <span class="toggle-password" id="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password">Confirmar Senha *</label>
+                    <div class="password-container">
+                        <input type="password" id="confirm-password" class="form-control" placeholder="Confirme a senha" required>
+                        <span class="toggle-password" id="toggle-confirm-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profile">Perfil de Acesso *</label>
+                    <select id="profile" class="form-control" required>
+                        <option value="">Selecione um perfil</option>
+                        <option value="admin">Administrador</option>
+                        <option value="user">Usuário</option>
+                        <option value="guest">Convidado</option>
+                    </select>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Cadastrar Usuário</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="form-card">
+            <h2>Usuários Cadastrados</h2>
+            <div class="loading" id="loading-users">
+                <div class="loading-spinner"></div>
+                <p>Carregando usuários...</p>
+            </div>
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Nome de Usuário</th>
+                        <th>Nome Completo</th>
+                        <th>Perfil</th>
+                        <th>Data de Criação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="users-list">
+                    <!-- Os usuários serão carregados aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2023</p>
+    </footer>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNmIm9kem9yKp9skGS2HKHwqaauK36aps",
+            authDomain: "dbaderevidas-9cbd0.firebaseapp.com",
+            projectId: "dbaderevidas-9cbd0",
+            storageBucket: "dbaderevidas-9cbd0.firebasestorage.app",
+            messagingSenderId: "762500930740",
+            appId: "1:762500930740:web:ff13ea2685e2db28ec0be1"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Elementos da interface
+        const userForm = document.getElementById('user-form');
+        const usernameInput = document.getElementById('username');
+        const fullnameInput = document.getElementById('fullname');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const profileSelect = document.getElementById('profile');
+        const successAlert = document.getElementById('success-alert');
+        const errorAlert = document.getElementById('error-alert');
+        const errorMessage = document.getElementById('error-message');
+        const usersList = document.getElementById('users-list');
+        const togglePasswordBtn = document.getElementById('toggle-password');
+        const toggleConfirmPasswordBtn = document.getElementById('toggle-confirm-password');
+        const loading = document.getElementById('loading');
+        const loadingUsers = document.getElementById('loading-users');
+        
+        // Adicionar funcionalidade ao botão de logout
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            if(confirm('Deseja realmente sair do sistema?')) {
+                window.location.href = 'index.html';
+            }
+        });
+        
+        // Botão cancelar
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            userForm.reset();
+        });
+        
+        // Mostrar/ocultar senha
+        togglePasswordBtn.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                passwordInput.type = 'password';
+                togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        });
+        
+        toggleConfirmPasswordBtn.addEventListener('click', function() {
+            if (confirmPasswordInput.type === 'password') {
+                confirmPasswordInput.type = 'text';
+                toggleConfirmPasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                confirmPasswordInput.type = 'password';
+                toggleConfirmPasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        });
+        
+        // Validar e enviar formulário
+        userForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validar campos
+            const username = usernameInput.value.trim();
+            const fullname = fullnameInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const profile = profileSelect.value;
+            
+            // Esconder alertas
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            
+            // Validar se as senhas coincidem
+            if (password !== confirmPassword) {
+                showError('As senhas não coincidem.');
+                return;
+            }
+            
+            // Validar força da senha
+            if (password.length < 6) {
+                showError('A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+            
+            // Mostrar loading
+            loading.style.display = 'block';
+            
+            try {
+                // Verificar se o usuário já existe
+                const userSnapshot = await db.collection('users')
+                    .where('username', '==', username)
+                    .get();
+                
+                if (!userSnapshot.empty) {
+                    throw new Error('Este nome de usuário já está em uso.');
+                }
+                
+                // Criar hash da senha (em produção, use uma biblioteca como bcrypt)
+                // Nota: Em um sistema real, você deve usar uma função de hash adequada no backend
+                const passwordHash = await hashPassword(password);
+                
+                // Salvar usuário no Firestore
+                await db.collection('users').add({
+                    username: username,
+                    fullname: fullname,
+                    password: passwordHash, // Em produção, nunca armazene senhas em texto puro
+                    profile: profile,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Mostrar mensagem de sucesso
+                successAlert.style.display = 'block';
+                
+                // Limpar formulário
+                userForm.reset();
+                
+                // Atualizar lista de usuários
+                loadUsers();
+                
+                // Rolar para o topo para ver a mensagem de sucesso
+                window.scrollTo(0, 0);
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                // Esconder loading
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Função para exibir mensagem de erro
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            
+            // Rolar para o topo para ver a mensagem de erro
+            window.scrollTo(0, 0);
+        }
+        
+        // Função para carregar usuários do Firestore
+        async function loadUsers() {
+            try {
+                loadingUsers.style.display = 'block';
+                usersList.innerHTML = '';
+                
+                const usersSnapshot = await db.collection('users')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                if (usersSnapshot.empty) {
+                    usersList.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum usuário cadastrado</td></tr>';
+                    return;
+                }
+                
+                usersSnapshot.forEach(doc => {
+                    const user = doc.data();
+                    const row = document.createElement('tr');
+                    
+                    // Converter código do perfil para texto
+                    let profileText = '';
+                    switch(user.profile) {
+                        case 'admin':
+                            profileText = 'Administrador';
+                            break;
+                        case 'user':
+                            profileText = 'Usuário';
+                            break;
+                        case 'guest':
+                            profileText = 'Convidado';
+                            break;
+                        default:
+                            profileText = user.profile;
+                    }
+                    
+                    // Formatar data
+                    const createdAt = user.createdAt ? 
+                        user.createdAt.toDate().toLocaleDateString('pt-BR') : 
+                        'Data não disponível';
+                    
+                    row.innerHTML = `
+                        <td>${user.username}</td>
+                        <td>${user.fullname}</td>
+                        <td>${profileText}</td>
+                        <td>${createdAt}</td>
+                        <td>
+                            <button class="action-btn" data-id="${doc.id}"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    
+                    usersList.appendChild(row);
+                });
+                
+                // Adicionar event listeners para os botões de ação
+                document.querySelectorAll('.action-btn.delete').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-id');
+                        deleteUser(userId);
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                usersList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b21f1f;">Erro ao carregar usuários</td></tr>';
+            } finally {
+                loadingUsers.style.display = 'none';
+            }
+        }
+        
+        // Função para excluir usuário
+        async function deleteUser(userId) {
+            if (!confirm('Tem certeza que deseja excluir este usuário?')) {
+                return;
+            }
+            
+            try {
+                await db.collection('users').doc(userId).delete();
+                successAlert.textContent = 'Usuário excluído com sucesso!';
+                successAlert.style.display = 'block';
+                loadUsers();
+            } catch (error) {
+                showError('Erro ao excluir usuário: ' + error.message);
+            }
+        }
+        
+        // Função para hash de senha (simulada - em produção use uma solução adequada)
+        async function hashPassword(password) {
+            // Em um sistema real, use uma biblioteca como bcrypt no backend
+            // Esta é apenas uma simulação para demonstração
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
+        
+        // Inicializar a lista de usuários quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

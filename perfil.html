@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil do Usuário - Igreja Adere Vidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header e Navegação */
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .header-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+        }
+        
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Menu de Navegação */
+        nav {
+            background-color: #2c3e50;
+            padding: 0 20px;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .menu {
+            list-style-type: none;
+            display: flex;
+        }
+        
+        .menu-item {
+            position: relative;
+        }
+        
+        .menu-item > a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-item > a:hover {
+            background-color: #34495e;
+        }
+        
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 5px 5px;
+            display: none;
+            z-index: 10;
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .menu-item:hover .dropdown {
+            display: block;
+        }
+        
+        /* Conteúdo Principal */
+        .main-content {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .page-title {
+            color: #1a2a6c;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .profile-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+        
+        .profile-info h2 {
+            color: #1a2a6c;
+            margin-bottom: 5px;
+        }
+        
+        .profile-info p {
+            color: #666;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-item {
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: #333;
+            padding: 8px 0;
+        }
+        
+        /* Formulário de alteração de senha */
+        .form-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-title {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #24378a, #c52d2d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+            margin-right: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #1a2a6c;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+            
+            .menu {
+                flex-direction: column;
+            }
+            
+            .dropdown {
+                position: static;
+                width: 100%;
+                display: none;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .menu-item:hover .dropdown {
+                display: none;
+            }
+            
+            .menu-item.active .dropdown {
+                display: block;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .btn-secondary {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
+                <div class="header-title">Igreja Adere Vidas</div>
+            </div>
+            <div class="user-info">
+                <span id="header-username">Bem-vindo, Usuário</span>
+                <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="nav-container">
+            <ul class="menu">
+                <li class="menu-item">
+                    <a href="main.html"><i class="fas fa-home"></i> Início</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-church"></i> Ministérios</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-calendar-alt"></i> Eventos</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-users"></i> Membros</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-file-alt"></i> Relatórios</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-cogs"></i> Configurações</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-database"></i> Cadastro <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown">
+                        <a href="add_usuario.html" class="dropdown-item"><i class="fas fa-user"></i> Usuário</a>
+                        <a href="perfil.html" class="dropdown-item"><i class="fas fa-id-card"></i> Perfil</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <h1 class="page-title">Meu Perfil</h1>
+        
+        <div class="alert alert-success" id="success-alert">
+            <i class="fas fa-check-circle"></i> <span id="success-message"></span>
+        </div>
+        
+        <div class="alert alert-error" id="error-alert">
+            <i class="fas fa-exclamation-circle"></i> <span id="error-message"></span>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Carregando...</p>
+        </div>
+        
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profile-avatar">
+                    <!-- Avatar será preenchido via JavaScript -->
+                </div>
+                <div class="profile-info">
+                    <h2 id="profile-fullname">Nome do Usuário</h2>
+                    <p id="profile-username">@username</p>
+                </div>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Nome de Usuário</div>
+                    <div class="info-value" id="info-username">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Nome Completo</div>
+                    <div class="info-value" id="info-fullname">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Perfil de Acesso</div>
+                    <div class="info-value" id="info-profile">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Data de Criação</div>
+                    <div class="info-value" id="info-createdat">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Última Atualização</div>
+                    <div class="info-value" id="info-updatedat">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value" id="info-status">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-card">
+            <h2 class="form-title">Alterar Senha</h2>
+            
+            <form id="password-form">
+                <div class="form-group">
+                    <label for="current-password">Senha Atual *</label>
+                    <div class="password-container">
+                        <input type="password" id="current-password" class="form-control" placeholder="Digite sua senha atual" required>
+                        <span class="toggle-password" id="toggle-current-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password">Nova Senha *</label>
+                    <div class="password-container">
+                        <input type="password" id="new-password" class="form-control" placeholder="Digite a nova senha" required>
+                        <span class="toggle-password" id="toggle-new-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                    <small>A senha deve ter pelo menos 6 caracteres.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-new-password">Confirmar Nova Senha *</label>
+                    <div class="password-container">
+                        <input type="password" id="confirm-new-password" class="form-control" placeholder="Confirme a nova senha" required>
+                        <span class="toggle-password" id="toggle-confirm-new-password">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Alterar Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2023</p>
+    </footer>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNmIm9kem9yKp9skGS2HKHwqaauK36aps",
+            authDomain: "dbaderevidas-9cbd0.firebaseapp.com",
+            projectId: "dbaderevidas-9cbd0",
+            storageBucket: "dbaderevidas-9cbd0.firebasestorage.app",
+            messagingSenderId: "762500930740",
+            appId: "1:762500930740:web:ff13ea2685e2db28ec0be1"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Elementos da interface
+        const successAlert = document.getElementById('success-alert');
+        const successMessage = document.getElementById('success-message');
+        const errorAlert = document.getElementById('error-alert');
+        const errorMessage = document.getElementById('error-message');
+        const loading = document.getElementById('loading');
+        const passwordForm = document.getElementById('password-form');
+        const headerUsername = document.getElementById('header-username');
+        const profileAvatar = document.getElementById('profile-avatar');
+        const profileFullname = document.getElementById('profile-fullname');
+        const profileUsername = document.getElementById('profile-username');
+        
+        // Verificar se o usuário está logado
+        let currentUser = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se há um usuário logado
+            const userData = sessionStorage.getItem('user');
+            
+            if (!userData) {
+                // Redirecionar para login se não estiver logado
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            loadUserData();
+        });
+        
+        // Adicionar funcionalidade ao botão de logout
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            if(confirm('Deseja realmente sair do sistema?')) {
+                sessionStorage.removeItem('user');
+                window.location.href = 'index.html';
+            }
+        });
+        
+        // Botão cancelar
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            passwordForm.reset();
+        });
+        
+        // Mostrar/ocultar senha
+        document.getElementById('toggle-current-password').addEventListener('click', function() {
+            const input = document.getElementById('current-password');
+            togglePasswordVisibility(input, this);
+        });
+        
+        document.getElementById('toggle-new-password').addEventListener('click', function() {
+            const input = document.getElementById('new-password');
+            togglePasswordVisibility(input, this);
+        });
+        
+        document.getElementById('toggle-confirm-new-password').addEventListener('click', function() {
+            const input = document.getElementById('confirm-new-password');
+            togglePasswordVisibility(input, this);
+        });
+        
+        function togglePasswordVisibility(input, toggleBtn) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+        
+        // Carregar dados do usuário
+        async function loadUserData() {
+            try {
+                loading.style.display = 'block';
+                
+                const userDoc = await db.collection('users').doc(currentUser.id).get();
+                
+                if (!userDoc.exists) {
+                    throw new Error('Usuário não encontrado.');
+                }
+                
+                const userData = userDoc.data();
+                
+                // Atualizar header
+                headerUsername.textContent = `Bem-vindo, ${userData.fullname}`;
+                
+                // Atualizar informações do perfil
+                document.getElementById('info-username').textContent = userData.username;
+                document.getElementById('info-fullname').textContent = userData.fullname;
+                
+                // Converter código do perfil para texto
+                let profileText = '';
+                switch(userData.profile) {
+                    case 'admin':
+                        profileText = 'Administrador';
+                        break;
+                    case 'user':
+                        profileText = 'Usuário';
+                        break;
+                    case 'guest':
+                        profileText = 'Convidado';
+                        break;
+                    default:
+                        profileText = userData.profile;
+                }
+                
+                document.getElementById('info-profile').textContent = profileText;
+                
+                // Formatar datas
+                const createdAt = userData.createdAt ? 
+                    userData.createdAt.toDate().toLocaleDateString('pt-BR') : 
+                    'Data não disponível';
+                
+                const updatedAt = userData.updatedAt ? 
+                    userData.updatedAt.toDate().toLocaleDateString('pt-BR') : 
+                    'Data não disponível';
+                
+                document.getElementById('info-createdat').textContent = createdAt;
+                document.getElementById('info-updatedat').textContent = updatedAt;
+                document.getElementById('info-status').textContent = 'Ativo';
+                
+                // Atualizar avatar e nome
+                const initials = userData.fullname.split(' ').map(name => name[0]).join('').toUpperCase();
+                profileAvatar.textContent = initials;
+                profileFullname.textContent = userData.fullname;
+                profileUsername.textContent = `@${userData.username}`;
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados do usuário:', error);
+                showError('Erro ao carregar dados do perfil.');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Alterar senha
+        passwordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+            
+            // Esconder alertas
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+            
+            // Validar se as novas senhas coincidem
+            if (newPassword !== confirmNewPassword) {
+                showError('As novas senhas não coincidem.');
+                return;
+            }
+            
+            // Validar força da senha
+            if (newPassword.length < 6) {
+                showError('A nova senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+            
+            try {
+                loading.style.display = 'block';
+                
+                // Buscar dados atuais do usuário
+                const userDoc = await db.collection('users').doc(currentUser.id).get();
+                
+                if (!userDoc.exists) {
+                    throw new Error('Usuário não encontrado.');
+                }
+                
+                const userData = userDoc.data();
+                
+                // Verificar se a senha atual está correta
+                const hashedCurrentPassword = await hashPassword(currentPassword);
+                
+                if (userData.password !== hashedCurrentPassword) {
+                    throw new Error('A senha atual está incorreta.');
+                }
+                
+                // Criar hash da nova senha
+                const hashedNewPassword = await hashPassword(newPassword);
+                
+                // Atualizar senha no Firestore
+                await db.collection('users').doc(currentUser.id).update({
+                    password: hashedNewPassword,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Mostrar mensagem de sucesso
+                successMessage.textContent = 'Senha alterada com sucesso!';
+                successAlert.style.display = 'block';
+                
+                // Limpar formulário
+                passwordForm.reset();
+                
+                // Rolar para o topo para ver a mensagem de sucesso
+                window.scrollTo(0, 0);
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Função para exibir mensagem de erro
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            
+            // Rolar para o topo para ver a mensagem de erro
+            window.scrollTo(0, 0);
+        }
+        
+        // Função para hash de senha (deve ser a mesma usada no cadastro)
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
+    </script>
+</body>
+</html>
