@@ -69,19 +69,20 @@
             margin-right: 15px;
         }
         
-        .logout-btn {
-            background-color: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
+    .logout-btn, .back-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 10px;
+}
+
+.logout-btn:hover, .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
         
         /* Menu de Navegação */
         nav {
@@ -759,54 +760,223 @@
                 height: 200px;
             }
         }
+
+  /* CSS da tabela com centralização */
+.members-table-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.members-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.members-table th {
+    background: linear-gradient(to right, #1a2a6c, #b21f1f);
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Coluna do nome alinhada à esquerda */
+.members-table th:nth-child(2) {
+    text-align: left;
+}
+
+.members-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: center;
+}
+
+/* Coluna do nome alinhada à esquerda */
+.members-table td:nth-child(2) {
+    text-align: left;
+}
+
+.members-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.members-table tr:last-child td {
+    border-bottom: none;
+}
+
+.table-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-action {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+}
+
+.btn-view {
+    background-color: #1a2a6c;
+    color: white;
+}
+
+.btn-view:hover {
+    background-color: #24378a;
+}
+
+.btn-edit {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.btn-edit:hover {
+    background-color: #e0a800;
+}
+
+.btn-deactivate {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-deactivate:hover {
+    background-color: #c82333;
+}
+
+.btn-delete {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #5a6268;
+}
+
+.no-members {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Para garantir que as colunas tenham larguras adequadas */
+.members-table th:nth-child(1),
+.members-table td:nth-child(1) {
+    width: 80px; /* ID */
+}
+
+.members-table th:nth-child(2),
+.members-table td:nth-child(2) {
+    width: auto; /* Nome - ocupa o espaço restante */
+}
+
+.members-table th:nth-child(3),
+.members-table td:nth-child(3) {
+    width: 120px; /* Função */
+}
+
+.members-table th:nth-child(4),
+.members-table td:nth-child(4) {
+    width: 150px; /* Congregação */
+}
+
+.members-table th:nth-child(5),
+.members-table td:nth-child(5) {
+    width: 300px; /* Ações */
+}
+
+/* Estilos para o campo de busca */
+.search-container {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box i.fa-search {
+    position: absolute;
+    left: 15px;
+    color: #666;
+    z-index: 2;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 45px 12px 45px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #1a2a6c;
+    box-shadow: 0 0 0 2px rgba(26, 42, 108, 0.1);
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.clear-search-btn:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.search-results-info {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+}
+/* Adicione este CSS para melhorar a exibição de nenhum resultado */
+.no-members i {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+    color: #999;
+}
+
+.no-members strong {
+    color: #1a2a6c;
+}
     </style>
 </head>
 <body>
-    <header>
+  <header>
         <div class="header-content">
             <div class="logo-container">
                 <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
-                <div class="header-title">Igreja Adere Vidas</div>
+                <div class="header-title">Gerenciamento de Membros - Igreja Adere Vidas</div>
             </div>
             <div class="user-info">
-                <span id="header-username">Bem-vindo, Administrador</span>
+                <span id="current-filial-info">Filial: Carregando...</span>
+                <button class="back-btn" onclick="window.location.href='main.html'"><i class="fas fa-arrow-left"></i> Voltar</button>
                 <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
             </div>
         </div>
     </header>
-    
-    <nav>
-        <div class="nav-container">
-            <ul class="menu">
-                <li class="menu-item">
-                    <a href="main.html"><i class="fas fa-home"></i> Início</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-church"></i> Ministérios</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-calendar-alt"></i> Eventos</a>
-                </li>
-                <li class="menu-item">
-                    <a href="membros.html"><i class="fas fa-users"></i> Membros</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-file-alt"></i> Relatórios</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-cogs"></i> Configurações</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-database"></i> Cadastro <i class="fas fa-chevron-down"></i></a>
-                    <div class="dropdown">
-                        <a href="add_usuario.html" class="dropdown-item"><i class="fas fa-user"></i> Usuário</a>
-                        <a href="perfil.html" class="dropdown-item"><i class="fas fa-id-card"></i> Perfil</a>
-                        <a href="add_filiais.html" class="dropdown-item"><i class="fas fa-church"></i> Filiais</a>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </nav>
     
     <div class="main-content">
         <div class="page-title">
@@ -830,6 +1000,19 @@
             <div class="tab" data-tab="online">Solicitações <span id="pending-count" class="pending-badge">0</span></div>
             <div class="tab" data-tab="carteirinhas">Carteirinhas</div>
         </div>
+
+        <!-- Adicione este código após as abas e antes do loading -->
+<div class="search-container" style="margin-bottom: 20px; display: none;" id="search-container">
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="member-search-input" placeholder="Buscar por ID, Nome, Função ou Congregação..." class="search-input">
+        <button id="clear-search" class="clear-search-btn" style="display: none;">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+     </div>
+     
+
         
         <div class="loading" id="loading-members">
             <div class="loading-spinner"></div>
@@ -1012,6 +1195,76 @@
         let photoBase64 = null;
         let allMembers = [];
         let selectedMembers = [];
+
+         // Estado da aplicação
+        let currentFilial = null;
+
+        // Elementos da interface
+        const currentFilialInfo = document.getElementById('current-filial-info');
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário está logado
+            const userData = sessionStorage.getItem('user');
+            
+            if (!userData) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Obter a filial atual da URL ou localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const filialId = urlParams.get('filial') || localStorage.getItem('currentFilialId');
+            
+            if (filialId) {
+                loadFilialInfo(filialId);
+            } else {
+                currentFilialInfo.textContent = 'Filial: Não selecionada';
+                loadMembers(); // Carregar membros mesmo sem filial selecionada
+            }
+            
+            // Configurar eventos
+            setupEventListeners();
+
+            initSearch();
+        });
+
+        // Carregar informações da filial
+        async function loadFilialInfo(filialId) {
+            try {
+                const filialDoc = await db.collection('filiais').doc(filialId).get();
+                if (filialDoc.exists) {
+                    currentFilial = filialDoc.data();
+                    currentFilial.id = filialId;
+                    currentFilialInfo.textContent = `Filial: ${currentFilial.congregacao}`;
+                } else {
+                    currentFilialInfo.textContent = 'Filial: Não encontrada';
+                }
+                
+                // Carregar membros após carregar a filial atual
+                loadMembers();
+            } catch (error) {
+                console.error('Erro ao carregar informações da filial:', error);
+                currentFilialInfo.textContent = 'Filial: Erro ao carregar';
+                loadMembers(); // Carregar membros mesmo com erro
+            }
+        }
+
+        // Configurar eventos
+        function setupEventListeners() {
+            // Logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if(confirm('Deseja realmente sair do sistema?')) {
+                    sessionStorage.removeItem('user');
+                    localStorage.removeItem('currentFilialId');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        
         
         // Máscara para CPF
         function aplicarMascaraCPF(cpf) {
@@ -1052,39 +1305,40 @@
             }
             
             currentUser = JSON.parse(userData);
-            headerUsername.textContent = `Bem-vindo, ${currentUser.fullname}`;
             loadMembers();
             initCardGeneration();
         });
         
-        // Adicionar funcionalidade ao botão de logout
-        document.querySelector('.logout-btn').addEventListener('click', function() {
-            if(confirm('Deseja realmente sair do sistema?')) {
-                sessionStorage.removeItem('user');
-                window.location.href = 'index.html';
+        // Funcionalidade das abas
+       tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        const tabId = tab.getAttribute('data-tab');
+        
+        // Ativar aba clicada
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Mostrar conteúdo correspondente
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+            if (content.id === `${tabId}-content`) {
+                content.classList.add('active');
             }
         });
         
-        // Funcionalidade das abas
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabId = tab.getAttribute('data-tab');
-                
-                // Ativar aba clicada
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                // Mostrar conteúdo correspondente
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === `${tabId}-content`) {
-                        content.classList.add('active');
-                    }
-                });
-                
-                selectedTab = tabId;
-            });
-        });
+        selectedTab = tabId;
+        
+        // Atualizar visibilidade do campo de busca
+        updateSearchVisibility();
+        
+        // Limpar busca ao trocar de aba
+        const searchInput = document.getElementById('member-search-input');
+        const clearSearchBtn = document.getElementById('clear-search');
+        searchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        clearSearch();
+    });
+});
         
         // Abrir modal de cadastro
         addMemberBtn.addEventListener('click', () => {
@@ -1095,12 +1349,23 @@
         closeModalBtn.addEventListener('click', closeModal);
         cancelBtn.addEventListener('click', closeModal);
         
-        function closeModal() {
-            memberModal.classList.remove('active');
-            memberForm.reset();
-            photoPreview.innerHTML = '<i class="fas fa-user fa-3x" style="color: #ddd;"></i>';
-            photoBase64 = null;
-        }
+       function closeModal() {
+    memberModal.classList.remove('active');
+    memberForm.reset();
+    photoPreview.innerHTML = '<i class="fas fa-user fa-3x" style="color: #ddd;"></i>';
+    photoBase64 = null;
+    
+    // Resetar o botão salvar para o comportamento padrão (cadastrar)
+    const saveBtn = document.getElementById('save-member-btn');
+    saveBtn.textContent = 'Salvar';
+    saveBtn.onclick = function() {
+        saveNewMember();
+    };
+    
+    // Resetar o título do modal
+    document.querySelector('.modal-title').textContent = 'Cadastrar Novo Membro';
+}
+        
         
         // Upload de foto
         photoInput.addEventListener('change', function(e) {
@@ -1160,124 +1425,188 @@
         }
         
         // Salvar membro
-        saveMemberBtn.addEventListener('click', async function() {
-            const nome = document.getElementById('nome').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const telefone = document.getElementById('telefone').value.trim();
-            const cpf = document.getElementById('cpf').value.trim();
-            const dataNascimento = document.getElementById('data-nascimento').value;
-            const dataBatismo = document.getElementById('data-batismo').value;
-            const conjuge = document.getElementById('conjuge').value.trim();
-            const mae = document.getElementById('mae').value.trim();
-            const pai = document.getElementById('pai').value.trim();
-            const endereco = document.getElementById('endereco').value.trim();
-            const dataEntrada = document.getElementById('data-entrada').value;
-            const observacao = document.getElementById('observacao').value.trim();
+        async function saveNewMember() {
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefone = document.getElementById('telefone').value.trim();
+    const cpf = document.getElementById('cpf').value.trim();
+    const dataNascimento = document.getElementById('data-nascimento').value;
+    const dataBatismo = document.getElementById('data-batismo').value;
+    const conjuge = document.getElementById('conjuge').value.trim();
+    const mae = document.getElementById('mae').value.trim();
+    const pai = document.getElementById('pai').value.trim();
+    const endereco = document.getElementById('endereco').value.trim();
+    const dataEntrada = document.getElementById('data-entrada').value;
+    const observacao = document.getElementById('observacao').value.trim();
+    
+    // Validar campos obrigatórios
+    if (!nome || !dataEntrada) {
+        showError('Por favor, preencha os campos obrigatórios.');
+        return;
+    }
+    
+    try {
+        // Gerar ID único para o membro
+        const memberId = generateMemberId();
+        
+        // Salvar membro no Firestore
+        await db.collection('membros').add({
+            id: memberId,
+            nome: nome,
+            email: email,
+            telefone: telefone,
+            cpf: cpf,
+            dataNascimento: dataNascimento,
+            dataBatismo: dataBatismo,
+            conjuge: conjuge,
+            mae: mae,
+            pai: pai,
+            endereco: endereco,
+            dataEntrada: dataEntrada,
+            observacao: observacao,
+            foto: photoBase64,
+            status: 'ativo',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdBy: currentUser.id
+        });
+        
+        // Mostrar mensagem de sucesso
+        successMessage.textContent = 'Membro cadastrado com sucesso!';
+        successAlert.style.display = 'block';
+        
+        // Fechar modal e atualizar lista
+        closeModal();
+        loadMembers();
+        
+    } catch (error) {
+        showError('Erro ao cadastrar membro: ' + error.message);
+    }
+}
+        
+       // Adicione esta variável global no início com as outras
+let isLoadingMembers = false;
+
+// Carregar membros do Firestore - VERSÃO CORRIGIDA
+async function loadMembers() {
+    if (isLoadingMembers) return;
+    
+    isLoadingMembers = true;
+    
+    try {
+        loadingMembers.style.display = 'block';
+        
+        // Limpar e criar estrutura de tabela
+        const ativosContent = document.getElementById('ativos-content');
+        const desligadosContent = document.getElementById('desligados-content');
+        const onlineContent = document.getElementById('online-content');
+        
+        // Estrutura para membros ativos
+        ativosContent.innerHTML = `
+            <div class="members-table-container">
+                <table class="members-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Função</th>
+                            <th>Congregação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ativos-list"></tbody>
+                </table>
+            </div>
+        `;
+        
+        // Estrutura para membros desligados
+        desligadosContent.innerHTML = `
+            <div class="members-table-container">
+                <table class="members-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Função</th>
+                            <th>Congregação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="desligados-list"></tbody>
+                </table>
+            </div>
+        `;
+        
+        // Estrutura para solicitações (mantém cards por enquanto)
+        onlineContent.innerHTML = '<div class="members-grid" id="online-list"></div>';
+        
+        const ativosList = document.getElementById('ativos-list');
+        const desligadosList = document.getElementById('desligados-list');
+        const onlineList = document.getElementById('online-list');
+        
+        const membrosSnapshot = await db.collection('membros')
+            .orderBy('createdAt', 'desc')
+            .get();
+        
+        // Limpar array global
+        currentFilteredMembers = [];
+        
+        if (membrosSnapshot.empty) {
+            ativosList.innerHTML = '<tr><td colspan="5" class="no-members">Nenhum membro cadastrado</td></tr>';
+            desligadosList.innerHTML = '<tr><td colspan="5" class="no-members">Nenhum membro desligado</td></tr>';
+            onlineList.innerHTML = '<p>Nenhuma solicitação pendente</p>';
+            pendingCount.textContent = '0';
+            return;
+        }
+        
+        let pendentesCount = 0;
+        
+        membrosSnapshot.forEach(doc => {
+            const membro = doc.data();
+            const memberWithId = {
+                id: doc.id,
+                ...membro
+            };
             
-            // Validar campos obrigatórios
-            if (!nome || !dataEntrada) {
-                showError('Por favor, preencha os campos obrigatórios.');
-                return;
-            }
+            // Adicionar ao array global para filtragem
+            currentFilteredMembers.push(memberWithId);
             
-            try {
-                // Gerar ID único para o membro
-                const memberId = generateMemberId();
-                
-                // Salvar membro no Firestore
-                await db.collection('membros').add({
-                    id: memberId,
-                    nome: nome,
-                    email: email,
-                    telefone: telefone,
-                    cpf: cpf,
-                    dataNascimento: dataNascimento,
-                    dataBatismo: dataBatismo,
-                    conjuge: conjuge,
-                    mae: mae,
-                    pai: pai,
-                    endereco: endereco,
-                    dataEntrada: dataEntrada,
-                    observacao: observacao,
-                    foto: photoBase64,
-                    status: 'ativo',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    createdBy: currentUser.id
-                });
-                
-                // Mostrar mensagem de sucesso
-                successMessage.textContent = 'Membro cadastrado com sucesso!';
-                successAlert.style.display = 'block';
-                
-                // Fechar modal e atualizar lista
-                closeModal();
-                loadMembers();
-                
-            } catch (error) {
-                showError('Erro ao cadastrar membro: ' + error.message);
+            if (membro.status === 'pendente') {
+                const card = createPendingMemberCard(doc.id, membro);
+                onlineList.appendChild(card);
+                pendentesCount++;
+            } else if (membro.status === 'ativo') {
+                const row = createMemberTableRow(doc.id, membro);
+                ativosList.appendChild(row);
+            } else if (membro.status === 'desligado') {
+                const row = createMemberTableRow(doc.id, membro);
+                desligadosList.appendChild(row);
             }
         });
         
-        // Carregar membros do Firestore
-        async function loadMembers() {
-            try {
-                loadingMembers.style.display = 'block';
-                
-                // Limpar listas
-                document.getElementById('ativos-list').innerHTML = '';
-                document.getElementById('desligados-list').innerHTML = '';
-                document.getElementById('online-list').innerHTML = '';
-                
-                const membrosSnapshot = await db.collection('membros')
-                    .orderBy('createdAt', 'desc')
-                    .get();
-                
-                if (membrosSnapshot.empty) {
-                    document.getElementById('ativos-list').innerHTML = '<p>Nenhum membro cadastrado</p>';
-                    document.getElementById('desligados-list').innerHTML = '<p>Nenhum membro desligado</p>';
-                    document.getElementById('online-list').innerHTML = '<p>Nenhuma solicitação pendente</p>';
-                    pendingCount.textContent = '0';
-                    return;
-                }
-                
-                let pendentesCount = 0;
-                
-                membrosSnapshot.forEach(doc => {
-                    const membro = doc.data();
-                    
-                    if (membro.status === 'pendente') {
-                        // Adicionar à lista de solicitações pendentes
-                        const card = createPendingMemberCard(doc.id, membro);
-                        document.getElementById('online-list').appendChild(card);
-                        pendentesCount++;
-                    } else if (membro.status === 'ativo') {
-                        // Adicionar à lista de membros ativos
-                        const card = createMemberCard(doc.id, membro);
-                        document.getElementById('ativos-list').appendChild(card);
-                    } else if (membro.status === 'desligado') {
-                        // Adicionar à lista de membros desligados
-                        const card = createMemberCard(doc.id, membro);
-                        document.getElementById('desligados-list').appendChild(card);
-                    }
-                });
-                
-                // Atualizar contador de solicitações pendentes
-                pendingCount.textContent = pendentesCount;
-                
-                // Mostrar mensagem se não houver solicitações
-                if (pendentesCount === 0) {
-                    document.getElementById('online-list').innerHTML = '<p>Nenhuma solicitação pendente</p>';
-                }
-                
-            } catch (error) {
-                console.error('Erro ao carregar membros:', error);
-                showError('Erro ao carregar membros.');
-            } finally {
-                loadingMembers.style.display = 'none';
-            }
+        // Atualizar contador e verificar listas vazias
+        pendingCount.textContent = pendentesCount;
+        
+        if (ativosList.children.length === 0) {
+            ativosList.innerHTML = '<tr><td colspan="5" class="no-members">Nenhum membro ativo</td></tr>';
         }
         
+        if (desligadosList.children.length === 0) {
+            desligadosList.innerHTML = '<tr><td colspan="5" class="no-members">Nenhum membro desligado</td></tr>';
+        }
+        
+        if (pendentesCount === 0 && onlineList.children.length === 0) {
+            onlineList.innerHTML = '<p>Nenhuma solicitação pendente</p>';
+        }
+        
+    } catch (error) {
+        console.error('Erro ao carregar membros:', error);
+        showError('Erro ao carregar membros.');
+    } finally {
+        loadingMembers.style.display = 'none';
+        isLoadingMembers = false;
+    }
+}
         // Criar card de membro pendente
         function createPendingMemberCard(id, membro) {
             const card = document.createElement('div');
@@ -1336,73 +1665,76 @@
         }
         
         // Criar card de membro
-        function createMemberCard(id, membro) {
-            const card = document.createElement('div');
-            card.className = 'member-card';
-            
-            // Formatar data de entrada
-            const dataEntrada = membro.dataEntrada ? 
-                new Date(membro.dataEntrada).toLocaleDateString('pt-BR') : 
-                'Data não informada';
-            
-            // Formatar data de nascimento
-            const dataNascimento = membro.dataNascimento ? 
-                new Date(membro.dataNascimento).toLocaleDateString('pt-BR') : 
-                'Data não informada';
-            
-            card.innerHTML = `
-                <img src="${membro.foto || 'https://via.placeholder.com/280x200?text=Sem+Foto'}" alt="${membro.nome}" class="member-photo">
-                <div class="member-info">
-                    <div class="member-id">ID: ${membro.id || 'N/A'}</div>
-                    <h3 class="member-name">${membro.nome}</h3>
-                    <div class="member-details">
-                        <p><i class="fas fa-calendar-alt"></i> Entrada: ${dataEntrada}</p>
-                        <p><i class="fas fa-birthday-cake"></i> Nascimento: ${dataNascimento}</p>
-                        ${membro.telefone ? `<p><i class="fas fa-phone"></i> ${membro.telefone}</p>` : ''}
-                        ${membro.cpf ? `<p><i class="fas fa-id-card"></i> ${membro.cpf}</p>` : ''}
-                    </div>
-                    <div class="member-actions">
-                        ${membro.status === 'ativo' ? 
-                            `<button class="action-btn btn-deactivate" data-id="${id}">
-                                <i class="fas fa-user-times"></i> Desligar
-                            </button>` : 
-                            `<button class="action-btn btn-activate" data-id="${id}">
-                                <i class="fas fa-user-check"></i> Reativar
-                            </button>`
-                        }
-                        <button class="action-btn btn-edit" data-id="${id}">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            // Adicionar event listeners aos botões
-            const deactivateBtn = card.querySelector('.btn-deactivate');
-            const activateBtn = card.querySelector('.btn-activate');
-            const editBtn = card.querySelector('.btn-edit');
-            
-            if (deactivateBtn) {
-                deactivateBtn.addEventListener('click', () => {
-                    updateMemberStatus(id, 'desligado');
-                });
+       function createMemberTableRow(id, membro) {
+    const row = document.createElement('tr');
+    
+    row.innerHTML = `
+    <td>${membro.id || 'N/A'}</td>
+    <td>${membro.nome || 'N/A'}</td>
+    <td>${membro.funcao || 'Membro'}</td>
+    <td>${currentFilial ? currentFilial.congregacao : 'Não informada'}</td>
+    <td>
+        <div class="table-actions">
+            <button class="btn-action btn-view" data-id="${id}" title="Ver detalhes">
+                <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn-action btn-edit" data-id="${id}" title="Editar">
+                <i class="fas fa-edit"></i>
+            </button>
+            ${membro.status === 'ativo' ? 
+                `<button class="btn-action btn-deactivate" data-id="${id}" title="Desligar">
+                    <i class="fas fa-user-times"></i>
+                </button>` : 
+                `<button class="btn-action btn-activate" data-id="${id}" title="Reativar">
+                    <i class="fas fa-user-check"></i>
+                </button>`
             }
-            
-            if (activateBtn) {
-                activateBtn.addEventListener('click', () => {
-                    updateMemberStatus(id, 'ativo');
-                });
-            }
-            
-            if (editBtn) {
-                editBtn.addEventListener('click', () => {
-                    // Implementar edição posteriormente
-                    alert('Funcionalidade de edição em desenvolvimento');
-                });
-            }
-            
-            return card;
-        }
+            <button class="btn-action btn-delete" data-id="${id}" title="Excluir">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </td>
+`;
+    
+    // Adicionar event listeners aos botões
+    const viewBtn = row.querySelector('.btn-view');
+    const editBtn = row.querySelector('.btn-edit');
+    const deactivateBtn = row.querySelector('.btn-deactivate');
+    const activateBtn = row.querySelector('.btn-activate');
+    const deleteBtn = row.querySelector('.btn-delete');
+    
+    if (viewBtn) {
+        viewBtn.addEventListener('click', () => {
+            viewMemberDetails(id, membro);
+        });
+    }
+    
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            editMember(id, membro);
+        });
+    }
+    
+    if (deactivateBtn) {
+        deactivateBtn.addEventListener('click', () => {
+            updateMemberStatus(id, 'desligado');
+        });
+    }
+    
+    if (activateBtn) {
+        activateBtn.addEventListener('click', () => {
+            updateMemberStatus(id, 'ativo');
+        });
+    }
+    
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            deleteMember(id);
+        });
+    }
+    
+    return row;
+}
         
         // Aceitar membro (mover para ativos)
         async function acceptMember(id) {
@@ -1446,31 +1778,53 @@
         }
         
         // Atualizar status do membro (ativo/desligado)
-        async function updateMemberStatus(id, status) {
-            const confirmMessage = status === 'desligado' ? 
-                'Tem certeza que deseja desligar este membro?' : 
-                'Tem certeza que deseja reativar este membro?';
-            
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-            
-            try {
-                await db.collection('membros').doc(id).update({
-                    status: status,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                const action = status === 'desligado' ? 'desligado' : 'reativado';
-                successMessage.textContent = `Membro ${action} com sucesso!`;
-                successAlert.style.display = 'block';
-                
-                loadMembers();
-                
-            } catch (error) {
-                showError('Erro ao atualizar status do membro: ' + error.message);
-            }
-        }
+       async function updateMember(id) {
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefone = document.getElementById('telefone').value.trim();
+    const cpf = document.getElementById('cpf').value.trim();
+    const dataNascimento = document.getElementById('data-nascimento').value;
+    const dataBatismo = document.getElementById('data-batismo').value;
+    const conjuge = document.getElementById('conjuge').value.trim();
+    const mae = document.getElementById('mae').value.trim();
+    const pai = document.getElementById('pai').value.trim();
+    const endereco = document.getElementById('endereco').value.trim();
+    const dataEntrada = document.getElementById('data-entrada').value;
+    const observacao = document.getElementById('observacao').value.trim();
+    
+    if (!nome || !dataEntrada) {
+        showError('Por favor, preencha os campos obrigatórios.');
+        return;
+    }
+    
+    try {
+        await db.collection('membros').doc(id).update({
+            nome: nome,
+            email: email,
+            telefone: telefone,
+            cpf: cpf,
+            dataNascimento: dataNascimento,
+            dataBatismo: dataBatismo,
+            conjuge: conjuge,
+            mae: mae,
+            pai: pai,
+            endereco: endereco,
+            dataEntrada: dataEntrada,
+            observacao: observacao,
+            foto: photoBase64,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        successMessage.textContent = 'Membro atualizado com sucesso!';
+        successAlert.style.display = 'block';
+        
+        closeModal();
+        loadMembers();
+        
+    } catch (error) {
+        showError('Erro ao atualizar membro: ' + error.message);
+    }
+}
         
         // Inicializar funcionalidade de carteirinhas
         function initCardGeneration() {
@@ -1885,6 +2239,294 @@
                 errorAlert.style.display = 'none';
             }, 5000);
         }
+
+        // Ver detalhes do membro
+function viewMemberDetails(id, membro) {
+    // Formatar datas
+    const dataNascimento = membro.dataNascimento ? 
+        new Date(membro.dataNascimento).toLocaleDateString('pt-BR') : 'Não informada';
+    
+    const dataBatismo = membro.dataBatismo ? 
+        new Date(membro.dataBatismo).toLocaleDateString('pt-BR') : 'Não informada';
+    
+    const dataEntrada = membro.dataEntrada ? 
+        new Date(membro.dataEntrada).toLocaleDateString('pt-BR') : 'Não informada';
+    
+    // Criar modal de detalhes
+    const modalHTML = `
+        <div class="modal active" id="details-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Detalhes do Membro</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                        <div style="flex: 0 0 150px;">
+                            <img src="${membro.foto || 'https://via.placeholder.com/150x200?text=Sem+Foto'}" 
+                                 alt="${membro.nome}" 
+                                 style="width: 150px; height: 200px; object-fit: cover; border-radius: 5px;">
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="color: #1a2a6c; margin-bottom: 15px;">${membro.nome}</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div><strong>ID:</strong> ${membro.id || 'N/A'}</div>
+                                <div><strong>CPF:</strong> ${membro.cpf || 'Não informado'}</div>
+                                <div><strong>Data Nasc.:</strong> ${dataNascimento}</div>
+                                <div><strong>Data Batismo:</strong> ${dataBatismo}</div>
+                                <div><strong>Data Entrada:</strong> ${dataEntrada}</div>
+                                <div><strong>Status:</strong> ${membro.status === 'ativo' ? 'Ativo' : 'Desligado'}</div>
+                                <div><strong>Telefone:</strong> ${membro.telefone || 'Não informado'}</div>
+                                <div><strong>E-mail:</strong> ${membro.email || 'Não informado'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Endereço:</strong> ${membro.endereco || 'Não informado'}
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div><strong>Pai:</strong> ${membro.pai || 'Não informado'}</div>
+                        <div><strong>Mãe:</strong> ${membro.mae || 'Não informado'}</div>
+                        <div><strong>Cônjuge:</strong> ${membro.conjuge || 'Não informado'}</div>
+                    </div>
+                    
+                    <div>
+                        <strong>Observações:</strong>
+                        <p style="margin-top: 5px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            ${membro.observacao || 'Nenhuma observação registrada.'}
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-cancel close-details">Fechar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Adicionar modal ao body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Configurar eventos do modal
+    const modal = document.getElementById('details-modal');
+    const closeBtn = modal.querySelector('.close-modal');
+    const closeDetailsBtn = modal.querySelector('.close-details');
+    
+    function closeModal() {
+        modal.remove();
+    }
+    
+    closeBtn.addEventListener('click', closeModal);
+    closeDetailsBtn.addEventListener('click', closeModal);
+}
+
+// Editar membro
+// Editar membro - VERSÃO CORRIGIDA
+function editMember(id, membro) {
+    // Preencher o modal de cadastro com os dados do membro
+    document.getElementById('nome').value = membro.nome || '';
+    document.getElementById('cpf').value = membro.cpf || '';
+    document.getElementById('data-nascimento').value = membro.dataNascimento || '';
+    document.getElementById('data-entrada').value = membro.dataEntrada || '';
+    document.getElementById('data-batismo').value = membro.dataBatismo || '';
+    document.getElementById('conjuge').value = membro.conjuge || '';
+    document.getElementById('mae').value = membro.mae || '';
+    document.getElementById('pai').value = membro.pai || '';
+    document.getElementById('email').value = membro.email || '';
+    document.getElementById('telefone').value = membro.telefone || '';
+    document.getElementById('endereco').value = membro.endereco || '';
+    document.getElementById('observacao').value = membro.observacao || '';
+    
+    if (membro.foto) {
+        photoBase64 = membro.foto;
+        photoPreview.innerHTML = `<img src="${membro.foto}" alt="Preview">`;
+    } else {
+        photoBase64 = null;
+        photoPreview.innerHTML = '<i class="fas fa-user fa-3x" style="color: #ddd;"></i>';
+    }
+    
+    // Alterar o título do modal
+    document.querySelector('.modal-title').textContent = 'Editar Membro';
+    
+    // Alterar comportamento do botão salvar para edição
+    const saveBtn = document.getElementById('save-member-btn');
+    saveBtn.textContent = 'Atualizar';
+    saveBtn.onclick = function() {
+        updateMember(id);
+    };
+    
+    // Abrir modal
+    memberModal.classList.add('active');
+}
+
+// Excluir membro
+async function deleteMember(id) {
+    if (!confirm('Tem certeza que deseja excluir este membro permanentemente? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+    
+    try {
+        await db.collection('membros').doc(id).delete();
+        
+        successMessage.textContent = 'Membro excluído com sucesso!';
+        successAlert.style.display = 'block';
+        
+        loadMembers();
+        
+    } catch (error) {
+        showError('Erro ao excluir membro: ' + error.message);
+    }
+}
+
+// Variável global para armazenar todos os membros filtrados
+let currentFilteredMembers = [];
+
+// Inicializar funcionalidade de busca
+function initSearch() {
+    const searchContainer = document.getElementById('search-container');
+    const searchInput = document.getElementById('member-search-input');
+    const clearSearchBtn = document.getElementById('clear-search');
+    
+    // Mostrar campo de busca apenas nas abas de ativos e desligados
+    updateSearchVisibility();
+    
+    // Evento de input para busca em tempo real
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        if (searchTerm.length > 0) {
+            clearSearchBtn.style.display = 'block';
+            filterMembers(searchTerm);
+        } else {
+            clearSearchBtn.style.display = 'none';
+            clearSearch();
+        }
+    });
+    
+    // Evento para limpar busca
+    clearSearchBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        clearSearch();
+    });
+    
+    // Evento para tecla Escape
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            clearSearchBtn.style.display = 'none';
+            clearSearch();
+        }
+    });
+}
+
+// Atualizar visibilidade do campo de busca baseado na aba atual
+function updateSearchVisibility() {
+    const searchContainer = document.getElementById('search-container');
+    
+    if (selectedTab === 'ativos' || selectedTab === 'desligados') {
+        searchContainer.style.display = 'block';
+    } else {
+        searchContainer.style.display = 'none';
+    }
+}
+
+// Filtrar membros
+function filterMembers(searchTerm) {
+    const currentTab = selectedTab;
+    const tbodyId = `${currentTab}-list`;
+    const tbody = document.getElementById(tbodyId);
+    
+    if (!tbody) return;
+    
+    // Obter todos os membros da aba atual
+    const allMembers = currentFilteredMembers.filter(member => 
+        member.status === (currentTab === 'ativos' ? 'ativo' : 'desligado')
+    );
+    
+    // Filtrar membros baseado no termo de busca
+    const filteredMembers = allMembers.filter(member => {
+        return (
+            (member.id && member.id.toLowerCase().includes(searchTerm)) ||
+            (member.nome && member.nome.toLowerCase().includes(searchTerm)) ||
+            (member.funcao && member.funcao.toLowerCase().includes(searchTerm)) ||
+            (currentFilial && currentFilial.congregacao && currentFilial.congregacao.toLowerCase().includes(searchTerm))
+        );
+    });
+    
+    // Atualizar a tabela com os resultados filtrados
+    renderFilteredMembers(tbody, filteredMembers, searchTerm);
+}
+
+// Renderizar membros filtrados
+function renderFilteredMembers(tbody, filteredMembers, searchTerm) {
+    tbody.innerHTML = '';
+    
+    if (filteredMembers.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="no-members">
+                    <i class="fas fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                    Nenhum membro encontrado para "<strong>${searchTerm}</strong>"
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    filteredMembers.forEach(memberData => {
+        const row = createMemberTableRow(memberData.id, memberData);
+        tbody.appendChild(row);
+    });
+    
+    // Adicionar informação de resultados
+    const resultsInfo = document.createElement('div');
+   
+    
+    // Remover info anterior se existir
+    const existingInfo = tbody.parentNode.querySelector('.search-results-info');
+    if (existingInfo) {
+        existingInfo.remove();
+    }
+    
+    tbody.parentNode.appendChild(resultsInfo);
+}
+
+// Limpar busca
+function clearSearch() {
+    const currentTab = selectedTab;
+    const tbodyId = `${currentTab}-list`;
+    const tbody = document.getElementById(tbodyId);
+    
+    if (!tbody) return;
+    
+    // Recarregar membros normais
+    const allMembers = currentFilteredMembers.filter(member => 
+        member.status === (currentTab === 'ativos' ? 'ativo' : 'desligado')
+    );
+    
+    tbody.innerHTML = '';
+    
+    if (allMembers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="no-members">Nenhum membro encontrado</td></tr>';
+    } else {
+        allMembers.forEach(memberData => {
+            const row = createMemberTableRow(memberData.id, memberData);
+            tbody.appendChild(row);
+        });
+    }
+    
+    // Remover info de resultados
+    const existingInfo = tbody.parentNode.querySelector('.search-results-info');
+    if (existingInfo) {
+        existingInfo.remove();
+    }
+}
+
+
+        
     </script>
 </body>
 </html>
