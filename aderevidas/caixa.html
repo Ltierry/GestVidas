@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Caixas - Igreja Adere Vidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header e Navegação */
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .header-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+        }
+        
+        .logout-btn, .back-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+        
+        .logout-btn:hover, .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Conteúdo Principal */
+        .main-content {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .page-title {
+            color: #1a2a6c;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-title {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #24378a, #c52d2d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+            margin-right: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        /* Tabela de caixas */
+        .caixas-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .caixas-table th, .caixas-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .caixas-table th {
+            background-color: #f8f9fa;
+            color: #1a2a6c;
+            font-weight: 600;
+        }
+        
+        .caixas-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status-ativo {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .status-inativo {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #1a2a6c;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .action-btn.delete {
+            color: #b21f1f;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #1a2a6c;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                margin-top: 15px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .btn-secondary {
+                margin-right: 0;
+            }
+            
+            .caixas-table {
+                font-size: 14px;
+            }
+            
+            .caixas-table th, .caixas-table td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
+                <div class="header-title">Cadastro de Caixas - Igreja Adere Vidas</div>
+            </div>
+            <div class="user-info">
+                <span id="current-filial-info">Filial: Carregando...</span>
+                <button class="back-btn" onclick="window.location.href='main.html'"><i class="fas fa-arrow-left"></i> Voltar</button>
+                <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <h1 class="page-title">Cadastro de Caixas Financeiros</h1>
+        
+        <div class="alert alert-success" id="success-alert">
+            <i class="fas fa-check-circle"></i> <span id="success-message"></span>
+        </div>
+        
+        <div class="alert alert-error" id="error-alert">
+            <i class="fas fa-exclamation-circle"></i> <span id="error-message"></span>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Salvando caixa...</p>
+        </div>
+        
+        <div class="form-card">
+            <h2 class="form-title">Novo Caixa Financeiro</h2>
+            <form id="caixa-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="filial">Congregação *</label>
+                        <select id="filial" class="form-control" required>
+                            <option value="">Selecione uma congregação</option>
+                            <!-- As filiais serão carregadas via JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nome-caixa">Nome do Caixa *</label>
+                        <input type="text" id="nome-caixa" class="form-control" placeholder="Ex: Caixa Principal, Caixa de Eventos" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tipo-caixa">Tipo de Caixa *</label>
+                        <select id="tipo-caixa" class="form-control" required>
+                            <option value="">Selecione o tipo</option>
+                            <option value="principal">Principal</option>
+                            <option value="eventos">Eventos</option>
+                            <option value="manutencao">Manutenção</option>
+                            <option value="doacoes">Doações</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saldo-inicial">Saldo Inicial (R$)</label>
+                        <input type="number" id="saldo-inicial" class="form-control" placeholder="0.00" step="0.01" min="0" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="responsavel">Responsável</label>
+                        <input type="text" id="responsavel" class="form-control" placeholder="Nome do responsável pelo caixa">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status *</label>
+                        <select id="status" class="form-control" required>
+                            <option value="ativo" selected>Ativo</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descricao">Descrição</label>
+                    <textarea id="descricao" class="form-control" placeholder="Descrição adicional sobre o caixa" rows="3"></textarea>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Cadastrar Caixa</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="form-card">
+            <h2 class="form-title">Caixas Cadastrados</h2>
+            <div class="loading" id="loading-caixas">
+                <div class="loading-spinner"></div>
+                <p>Carregando caixas...</p>
+            </div>
+            <table class="caixas-table">
+                <thead>
+                    <tr>
+                        <th>Congregação</th>
+                        <th>Nome do Caixa</th>
+                        <th>Tipo</th>
+                        <th>Saldo Atual</th>
+                        <th>Responsável</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="caixas-list">
+                    <!-- Os caixas serão carregados aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2025</p>
+    </footer>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNmIm9kem9yKp9skGS2HKHwqaauK36aps",
+            authDomain: "dbaderevidas-9cbd0.firebaseapp.com",
+            projectId: "dbaderevidas-9cbd0",
+            storageBucket: "dbaderevidas-9cbd0.firebasestorage.app",
+            messagingSenderId: "762500930740",
+            appId: "1:762500930740:web:ff13ea2685e2db28ec0be1"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Estado da aplicação
+        let currentFilial = null;
+        let currentUser = null;
+        
+        // Elementos da interface
+        const caixaForm = document.getElementById('caixa-form');
+        const filialSelect = document.getElementById('filial');
+        const successAlert = document.getElementById('success-alert');
+        const successMessage = document.getElementById('success-message');
+        const errorAlert = document.getElementById('error-alert');
+        const errorMessage = document.getElementById('error-message');
+        const loading = document.getElementById('loading');
+        const loadingCaixas = document.getElementById('loading-caixas');
+        const caixasList = document.getElementById('caixas-list');
+        const currentFilialInfo = document.getElementById('current-filial-info');
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário está logado
+            const userData = sessionStorage.getItem('user');
+            
+            if (!userData) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Obter a filial atual da URL ou localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const filialId = urlParams.get('filial') || localStorage.getItem('currentFilialId');
+            
+            if (filialId) {
+                loadFilialInfo(filialId);
+            } else {
+                currentFilialInfo.textContent = 'Filial: Não selecionada';
+                // Carregar filiais e caixas mesmo sem filial selecionada
+                loadFiliais();
+                loadCaixas();
+            }
+            
+            // Configurar eventos
+            setupEventListeners();
+        });
+        
+        // Carregar informações da filial
+        async function loadFilialInfo(filialId) {
+            try {
+                const filialDoc = await db.collection('filiais').doc(filialId).get();
+                if (filialDoc.exists) {
+                    currentFilial = filialDoc.data();
+                    currentFilial.id = filialId;
+                    currentFilialInfo.textContent = `Filial: ${currentFilial.congregacao}`;
+                } else {
+                    currentFilialInfo.textContent = 'Filial: Não encontrada';
+                }
+                
+                // Carregar filiais e caixas após carregar a filial atual
+                loadFiliais();
+                loadCaixas();
+            } catch (error) {
+                console.error('Erro ao carregar informações da filial:', error);
+                currentFilialInfo.textContent = 'Filial: Erro ao carregar';
+                loadFiliais();
+                loadCaixas();
+            }
+        }
+        
+        // Configurar eventos
+        function setupEventListeners() {
+            // Logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if(confirm('Deseja realmente sair do sistema?')) {
+                    sessionStorage.removeItem('user');
+                    localStorage.removeItem('currentFilialId');
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            // Cancelar
+            document.getElementById('cancel-btn').addEventListener('click', function() {
+                caixaForm.reset();
+            });
+            
+            // Formulário
+            caixaForm.addEventListener('submit', handleFormSubmit);
+        }
+        
+        // Manipular envio do formulário
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            // Obter valores dos campos
+            const filialId = filialSelect.value;
+            const nomeCaixa = document.getElementById('nome-caixa').value.trim();
+            const tipoCaixa = document.getElementById('tipo-caixa').value;
+            const saldoInicial = parseFloat(document.getElementById('saldo-inicial').value) || 0;
+            const responsavel = document.getElementById('responsavel').value.trim();
+            const status = document.getElementById('status').value;
+            const descricao = document.getElementById('descricao').value.trim();
+            
+            // Esconder alertas
+            hideAlerts();
+            
+            // Validar campos obrigatórios
+            if (!filialId || !nomeCaixa || !tipoCaixa) {
+                showError('Por favor, preencha os campos obrigatórios.');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            try {
+                // Verificar se já existe um caixa com o mesmo nome para esta filial
+                const caixaSnapshot = await db.collection('caixas')
+                    .where('filialId', '==', filialId)
+                    .where('nome', '==', nomeCaixa)
+                    .get();
+                
+                if (!caixaSnapshot.empty) {
+                    throw new Error('Já existe um caixa com este nome para esta congregação.');
+                }
+                
+                // Obter dados da filial selecionada
+                const filialDoc = await db.collection('filiais').doc(filialId).get();
+                if (!filialDoc.exists) {
+                    throw new Error('Congregação selecionada não encontrada.');
+                }
+                
+                const filialData = filialDoc.data();
+                
+                // Salvar caixa no Firestore
+                await db.collection('caixas').add({
+                    filialId: filialId,
+                    congregacao: filialData.congregacao,
+                    nome: nomeCaixa,
+                    tipo: tipoCaixa,
+                    saldoInicial: saldoInicial,
+                    saldoAtual: saldoInicial,
+                    responsavel: responsavel,
+                    status: status,
+                    descricao: descricao,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: currentUser.id
+                });
+                
+                showSuccess('Caixa cadastrado com sucesso!');
+                caixaForm.reset();
+                loadCaixas();
+                
+            } catch (error) {
+                console.error('Erro ao cadastrar caixa:', error);
+                showError(error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Carregar filiais para o select
+        async function loadFiliais() {
+            try {
+                const filiaisSnapshot = await db.collection('filiais')
+                    .orderBy('congregacao')
+                    .get();
+                
+                // Limpar opções existentes (exceto a primeira)
+                while (filialSelect.children.length > 1) {
+                    filialSelect.removeChild(filialSelect.lastChild);
+                }
+                
+                if (filiaisSnapshot.empty) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'Nenhuma filial cadastrada';
+                    filialSelect.appendChild(option);
+                    return;
+                }
+                
+                filiaisSnapshot.forEach(doc => {
+                    const filial = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = `${filial.congregacao} (${getTipoText(filial.tipo)})`;
+                    filialSelect.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar filiais:', error);
+                showError('Erro ao carregar a lista de congregações.');
+            }
+        }
+        
+        // Carregar caixas
+        async function loadCaixas() {
+            try {
+                loadingCaixas.style.display = 'block';
+                caixasList.innerHTML = '';
+                
+                const caixasSnapshot = await db.collection('caixas')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                if (caixasSnapshot.empty) {
+                    caixasList.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum caixa cadastrado</td></tr>';
+                    return;
+                }
+                
+                caixasSnapshot.forEach(doc => {
+                    const caixa = doc.data();
+                    const row = document.createElement('tr');
+                    
+                    // Formatar saldo como moeda
+                    const saldoFormatado = new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(caixa.saldoAtual || 0);
+                    
+                    row.innerHTML = `
+                        <td>${caixa.congregacao}</td>
+                        <td>${caixa.nome}</td>
+                        <td>${getTipoCaixaText(caixa.tipo)}</td>
+                        <td>${saldoFormatado}</td>
+                        <td>${caixa.responsavel || '-'}</td>
+                        <td>
+                            <span class="status-${caixa.status}">
+                                ${caixa.status === 'ativo' ? 'Ativo' : 'Inativo'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="action-btn" data-id="${doc.id}"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    
+                    caixasList.appendChild(row);
+                });
+                
+                // Event listeners para botões de ação
+                document.querySelectorAll('.action-btn.delete').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const caixaId = this.getAttribute('data-id');
+                        deleteCaixa(caixaId);
+                    });
+                });
+                
+                document.querySelectorAll('.action-btn:not(.delete)').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const caixaId = this.getAttribute('data-id');
+                        editCaixa(caixaId);
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar caixas:', error);
+                caixasList.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #b21f1f;">Erro ao carregar caixas</td></tr>';
+            } finally {
+                loadingCaixas.style.display = 'none';
+            }
+        }
+        
+        // Excluir caixa
+        async function deleteCaixa(caixaId) {
+            if (!confirm('Tem certeza que deseja excluir este caixa?\nEsta ação não pode ser desfeita.')) {
+                return;
+            }
+            
+            try {
+                await db.collection('caixas').doc(caixaId).delete();
+                showSuccess('Caixa excluído com sucesso!');
+                loadCaixas();
+            } catch (error) {
+                showError('Erro ao excluir caixa: ' + error.message);
+            }
+        }
+        
+        // Editar caixa (simulação)
+        function editCaixa(caixaId) {
+            alert(`Funcionalidade de edição para o caixa ${caixaId} será implementada em breve.`);
+        }
+        
+        // Funções auxiliares
+        function getTipoText(tipo) {
+            switch(tipo) {
+                case 'matriz': return 'Matriz';
+                case 'congregacao': return 'Congregação';
+                case 'ponto-pregacao': return 'Ponto de Pregação';
+                default: return tipo;
+            }
+        }
+        
+        function getTipoCaixaText(tipo) {
+            switch(tipo) {
+                case 'principal': return 'Principal';
+                case 'eventos': return 'Eventos';
+                case 'manutencao': return 'Manutenção';
+                case 'doacoes': return 'Doações';
+                case 'outros': return 'Outros';
+                default: return tipo;
+            }
+        }
+        
+        // Funções de alerta
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successAlert.style.display = 'block';
+            setTimeout(hideAlerts, 5000);
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            setTimeout(hideAlerts, 5000);
+        }
+        
+        function hideAlerts() {
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

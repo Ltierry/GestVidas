@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anúncio da Semana - Igreja Adere Vidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header e Navegação */
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .header-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+        }
+        
+        .logout-btn, .back-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+        
+        .logout-btn:hover, .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Conteúdo Principal */
+        .main-content {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .page-title {
+            color: #1a2a6c;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card-title {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        /* Controles da Semana */
+        .week-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .week-navigation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .week-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #1a2a6c;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .week-btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .current-week {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a2a6c;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #24378a, #c52d2d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        /* Anúncio da Semana */
+        .announcement {
+            background-color: white;
+            border: 2px solid #1a2a6c;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .announcement-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .church-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a2a6c;
+            margin-bottom: 5px;
+        }
+        
+        .week-range {
+            font-size: 18px;
+            color: #b21f1f;
+            font-weight: 600;
+        }
+        
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .day-events {
+            margin-bottom: 25px;
+        }
+        
+        .day-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .event-item {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #1a2a6c;
+        }
+        
+        .event-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a2a6c;
+            margin-bottom: 5px;
+        }
+        
+        .event-details {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .event-time, .event-location {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .event-description {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.4;
+        }
+        
+        .no-events {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .announcement-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #1a2a6c;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                margin-top: 15px;
+            }
+            
+            .week-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .event-details {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+        
+        /* Estilo para impressão/PDF */
+        @media print {
+            header, footer, .week-controls, .btn {
+                display: none !important;
+            }
+            
+            .announcement {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+            }
+            
+            body {
+                background-color: white;
+                margin: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
+                <div class="header-title">Anúncio da Semana - Igreja Adere Vidas</div>
+            </div>
+            <div class="user-info">
+                <span id="current-filial-info">Filial: Carregando...</span>
+                <button class="back-btn" onclick="window.location.href='main.html'"><i class="fas fa-arrow-left"></i> Voltar</button>
+                <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <h1 class="page-title">Anúncio da Semana</h1>
+        
+        <div class="alert alert-success" id="success-alert">
+            <i class="fas fa-check-circle"></i> <span id="success-message"></span>
+        </div>
+        
+        <div class="alert alert-error" id="error-alert">
+            <i class="fas fa-exclamation-circle"></i> <span id="error-message"></span>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Carregando eventos da semana...</p>
+        </div>
+        
+        <div class="card">
+            <div class="week-controls">
+                <div class="week-navigation">
+                    <button class="week-btn" id="prev-week"><i class="fas fa-chevron-left"></i> Semana Anterior</button>
+                    <div class="current-week" id="current-week">Carregando...</div>
+                    <button class="week-btn" id="next-week">Próxima Semana <i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <button class="btn btn-primary" id="generate-pdf">
+                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                </button>
+            </div>
+            
+            <div class="announcement" id="announcement">
+                <div class="announcement-header">
+                    <div class="church-name" id="church-name">Igreja Adere Vidas</div>
+                    <div class="week-range" id="week-range">Programação Semanal</div>
+                </div>
+                
+                <div class="events-list" id="events-list">
+                    <div class="no-events">Nenhum evento encontrado para esta semana.</div>
+                </div>
+                
+                <div class="announcement-footer">
+                    <p>Entre em contato conosco para mais informações: (21) 988656792</p>
+                    <p>Visite nosso site: www.igrejaaderevidas.com.br</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2025</p>
+    </footer>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNmIm9kem9yKp9skGS2HKHwqaauK36aps",
+            authDomain: "dbaderevidas-9cbd0.firebaseapp.com",
+            projectId: "dbaderevidas-9cbd0",
+            storageBucket: "dbaderevidas-9cbd0.firebasestorage.app",
+            messagingSenderId: "762500930740",
+            appId: "1:762500930740:web:ff13ea2685e2db28ec0be1"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Estado da aplicação
+        let currentWeekStart = new Date();
+        let currentFilial = null;
+        let currentUser = null;
+        let weekEvents = [];
+        
+        // Ajustar para domingo (0 = Domingo, 1 = Segunda, etc.)
+      currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
+currentWeekStart.setHours(0, 0, 0, 0);
+        
+        // Elementos da interface
+        const currentWeekElement = document.getElementById('current-week');
+        const weekRangeElement = document.getElementById('week-range');
+        const churchNameElement = document.getElementById('church-name');
+        const eventsListElement = document.getElementById('events-list');
+        const currentFilialInfo = document.getElementById('current-filial-info');
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário está logado
+            const userData = sessionStorage.getItem('user');
+            
+            if (!userData) {
+                // Redirecionar para login se não estiver logado
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Obter a filial atual
+            const urlParams = new URLSearchParams(window.location.search);
+            const filialId = urlParams.get('filial') || localStorage.getItem('currentFilialId');
+            
+            if (filialId) {
+                loadFilialInfo(filialId);
+            } else {
+                currentFilialInfo.textContent = 'Filial: Não selecionada';
+                showError('Selecione uma filial para visualizar os anúncios.');
+            }
+            
+            // Configurar eventos de interface
+            setupEventListeners();
+            
+            // Atualizar interface
+            updateWeekDisplay();
+        });
+        
+        // Carregar informações da filial
+        async function loadFilialInfo(filialId) {
+            try {
+                const filialDoc = await db.collection('filiais').doc(filialId).get();
+                if (filialDoc.exists) {
+                    currentFilial = filialDoc.data();
+                    currentFilial.id = filialId;
+                    currentFilialInfo.textContent = `Filial: ${currentFilial.congregacao}`;
+                    churchNameElement.textContent = currentFilial.congregacao;
+                    
+                    // Carregar eventos da semana
+                    loadWeekEvents();
+                } else {
+                    currentFilialInfo.textContent = 'Filial: Não encontrada';
+                    showError('Filial não encontrada.');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar informações da filial:', error);
+                currentFilialInfo.textContent = 'Filial: Erro ao carregar';
+                showError('Erro ao carregar informações da filial.');
+            }
+        }
+        
+        // Carregar eventos da semana
+        async function loadWeekEvents() {
+    try {
+        if (!currentFilial) return;
+        
+        document.getElementById('loading').style.display = 'block';
+        
+        // CORREÇÃO: Calcular início e fim da semana (domingo a domingo - 8 dias)
+        const weekStart = new Date(currentWeekStart);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 7); // Domingo a domingo (8 dias)
+        
+        console.log('Buscando eventos de:', weekStart, 'até', weekEnd);
+        
+        // Buscar eventos da filial
+        const eventsSnapshot = await db.collection('eventos')
+            .where('filialId', '==', currentFilial.id)
+            .get();
+        
+        weekEvents = [];
+        eventsSnapshot.forEach(doc => {
+            const eventData = doc.data();
+            eventData.id = doc.id;
+            
+            // Verificar se o evento está dentro da semana
+            const eventDate = new Date(eventData.data + 'T00:00:00');
+            if (eventDate >= weekStart && eventDate <= weekEnd) {
+                weekEvents.push(eventData);
+            }
+        });
+        
+        // Ordenar eventos por data e horário
+        weekEvents.sort((a, b) => {
+            const dateA = new Date(a.data + (a.horario ? 'T' + a.horario : 'T00:00:00'));
+            const dateB = new Date(b.data + (b.horario ? 'T' + b.horario : 'T00:00:00'));
+            return dateA - dateB;
+        });
+        
+        updateEventsDisplay();
+        
+    } catch (error) {
+        console.error('Erro ao carregar eventos da semana:', error);
+        showError('Erro ao carregar eventos: ' + error.message);
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+        // Atualizar exibição dos eventos
+        function updateEventsDisplay() {
+            eventsListElement.innerHTML = '';
+            
+            if (weekEvents.length === 0) {
+                eventsListElement.innerHTML = '<div class="no-events">Nenhum evento encontrado para esta semana.</div>';
+                return;
+            }
+            
+            // Agrupar eventos por dia
+            const eventsByDay = {};
+            weekEvents.forEach(event => {
+                const eventDate = new Date(event.data + 'T00:00:00');
+                const dayKey = eventDate.toISOString().split('T')[0];
+                
+                if (!eventsByDay[dayKey]) {
+                    eventsByDay[dayKey] = [];
+                }
+                
+                eventsByDay[dayKey].push(event);
+            });
+            
+            // Ordenar dias
+            const sortedDays = Object.keys(eventsByDay).sort();
+            
+            // Exibir eventos por dia
+            sortedDays.forEach(dayKey => {
+                const dayEvents = eventsByDay[dayKey];
+                const dayDate = new Date(dayKey + 'T00:00:00');
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day-events';
+                
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = dayDate.toLocaleDateString('pt-BR', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long'
+                });
+                dayElement.appendChild(dayHeader);
+                
+                dayEvents.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'event-item';
+                    
+                    const eventTitle = document.createElement('div');
+                    eventTitle.className = 'event-title';
+                    eventTitle.textContent = event.titulo;
+                    eventElement.appendChild(eventTitle);
+                    
+                    const eventDetails = document.createElement('div');
+                    eventDetails.className = 'event-details';
+                    
+                    if (event.horario) {
+                        const timeElement = document.createElement('div');
+                        timeElement.className = 'event-time';
+                        timeElement.innerHTML = `<i class="far fa-clock"></i> ${event.horario}`;
+                        eventDetails.appendChild(timeElement);
+                    }
+                    
+                    if (event.local) {
+                        const locationElement = document.createElement('div');
+                        locationElement.className = 'event-location';
+                        locationElement.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${event.local}`;
+                        eventDetails.appendChild(locationElement);
+                    }
+                    
+                    eventElement.appendChild(eventDetails);
+                    
+                    if (event.descricao) {
+                        const descriptionElement = document.createElement('div');
+                        descriptionElement.className = 'event-description';
+                        descriptionElement.textContent = event.descricao;
+                        eventElement.appendChild(descriptionElement);
+                    }
+                    
+                    dayElement.appendChild(eventElement);
+                });
+                
+                eventsListElement.appendChild(dayElement);
+            });
+        }
+        
+        // Atualizar exibição da semana
+     function updateWeekDisplay() {
+    const weekStart = new Date(currentWeekStart);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7); // Domingo a domingo (8 dias)
+    
+    const options = { day: 'numeric', month: 'long' };
+    const startStr = weekStart.toLocaleDateString('pt-BR', options);
+    const endStr = weekEnd.toLocaleDateString('pt-BR', options);
+    const year = weekStart.getFullYear();
+    
+    currentWeekElement.textContent = `Semana de ${startStr} a ${endStr} de ${year}`;
+    weekRangeElement.textContent = `Programação de ${startStr} a ${endStr} de ${year}`;
+    
+    // Recarregar eventos se a filial estiver carregada
+    if (currentFilial) {
+        loadWeekEvents();
+    }
+}
+        
+        // Gerar PDF
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // Adicionar conteúdo do anúncio ao PDF
+            const announcementElement = document.getElementById('announcement');
+            
+            html2canvas(announcementElement, {
+                scale: 2,
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = doc.internal.pageSize.getWidth();
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                
+                // Abrir PDF em nova aba
+                const pdfBlob = doc.output('blob');
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                window.open(pdfUrl, '_blank');
+            });
+        }
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Navegação de semanas
+            document.getElementById('prev-week').addEventListener('click', function() {
+                currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+                updateWeekDisplay();
+            });
+            
+            document.getElementById('next-week').addEventListener('click', function() {
+                currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+                updateWeekDisplay();
+            });
+            
+            // Gerar PDF
+            document.getElementById('generate-pdf').addEventListener('click', generatePDF);
+            
+            // Logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if(confirm('Deseja realmente sair do sistema?')) {
+                    sessionStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+        
+        // Funções de alerta
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('success-alert').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('success-alert').style.display = 'none';
+            }, 5000);
+        }
+        
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-alert').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('error-alert').style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

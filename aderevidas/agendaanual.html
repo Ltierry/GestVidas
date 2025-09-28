@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Anual - Igreja Adere Vidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header e Navegação */
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .header-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+        }
+        
+        .logout-btn, .back-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+        
+        .logout-btn:hover, .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Conteúdo Principal */
+        .main-content {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .page-title {
+            color: #1a2a6c;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card-title {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        /* Controles do Calendário */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .year-selector {
+            display: flex;
+            align-items: center;
+        }
+        
+        .year-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #1a2a6c;
+            padding: 0 10px;
+        }
+        
+        .current-year {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a2a6c;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .import-export {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #24378a, #c52d2d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        /* Calendário */
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .calendar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .calendar {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .month {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .month-header {
+            text-align: center;
+            font-weight: 600;
+            color: #1a2a6c;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        
+        .day-header {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            padding: 5px 0;
+        }
+        
+        .day {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+        
+        .day.empty {
+            background-color: transparent;
+            cursor: default;
+        }
+        
+        .day.has-event {
+            background-color: #e6f2ff;
+            color: #1a2a6c;
+            font-weight: 600;
+        }
+        
+        .day.has-event::after {
+            content: "";
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: #1a2a6c;
+            border-radius: 50%;
+        }
+        
+        .day.has-event:hover {
+            background-color: #d4e6ff;
+        }
+        
+        .day.today {
+            background-color: #1a2a6c;
+            color: white;
+        }
+        
+        .day.today.has-event::after {
+            background-color: white;
+        }
+        
+        /* Modal de Eventos */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a2a6c;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Lista de Eventos */
+        .events-list {
+            margin-top: 20px;
+        }
+        
+        .event-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .event-info h4 {
+            color: #1a2a6c;
+            margin-bottom: 5px;
+        }
+        
+        .event-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .event-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: color 0.3s;
+        }
+        
+        .action-btn.edit:hover {
+            color: #1a2a6c;
+        }
+        
+        .action-btn.delete:hover {
+            color: #b21f1f;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #1a2a6c;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                margin-top: 15px;
+            }
+            
+            .calendar-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .import-export {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
+                <div class="header-title">Agenda Anual - Igreja Adere Vidas</div>
+            </div>
+            <div class="user-info">
+                <span id="current-filial-info">Filial: Carregando...</span>
+                <button class="back-btn" onclick="window.location.href='main.html'"><i class="fas fa-arrow-left"></i> Voltar</button>
+                <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <h1 class="page-title">Agenda Anual de Eventos</h1>
+        
+        <div class="alert alert-success" id="success-alert">
+            <i class="fas fa-check-circle"></i> <span id="success-message"></span>
+        </div>
+        
+        <div class="alert alert-error" id="error-alert">
+            <i class="fas fa-exclamation-circle"></i> <span id="error-message"></span>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Carregando eventos...</p>
+        </div>
+        
+        <div class="card">
+            <div class="calendar-controls">
+                <div class="year-selector">
+                    <button class="year-btn" id="prev-year"><i class="fas fa-chevron-left"></i></button>
+                    <div class="current-year" id="current-year">2023</div>
+                    <button class="year-btn" id="next-year"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <div class="import-export">
+                    <button class="btn btn-secondary" id="download-template">
+                        <i class="fas fa-download"></i> Baixar Modelo
+                    </button>
+                    <button class="btn btn-secondary" id="import-events">
+                        <i class="fas fa-upload"></i> Importar Excel
+                    </button>
+                    <input type="file" id="file-input" accept=".xlsx, .xls" style="display: none;">
+                    <button class="btn btn-primary" id="add-event">
+                        <i class="fas fa-plus"></i> Adicionar Evento
+                    </button>
+                </div>
+            </div>
+            
+            <div class="calendar" id="calendar">
+                <!-- O calendário será gerado via JavaScript -->
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Eventos do Ano</h2>
+            <div class="events-list" id="events-list">
+                <!-- Lista de eventos será carregada aqui -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para adicionar/editar evento -->
+    <div class="modal" id="event-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Adicionar Evento</h3>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="event-form">
+                    <input type="hidden" id="event-id">
+                    
+                    <div class="form-group">
+                        <label for="event-date">Data do Evento *</label>
+                        <input type="date" id="event-date" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-title">Título do Evento *</label>
+                        <input type="text" id="event-title" class="form-control" placeholder="Ex: Culto de Celebração" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-time">Horário</label>
+                        <input type="time" id="event-time" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-location">Local</label>
+                        <input type="text" id="event-location" class="form-control" placeholder="Ex: Templo Principal">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-description">Descrição</label>
+                        <textarea id="event-description" class="form-control" placeholder="Descrição detalhada do evento"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-type">Tipo de Evento</label>
+                        <select id="event-type" class="form-control">
+                            <option value="culto">Culto</option>
+                            <option value="estudo">Estudo Bíblico</option>
+                            <option value="conferencia">Conferência</option>
+                            <option value="social">Evento Social</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancel-event">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="save-event">Salvar Evento</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2025</p>
+    </footer>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNmIm9kem9yKp9skGS2HKHwqaauK36aps",
+            authDomain: "dbaderevidas-9cbd0.firebaseapp.com",
+            projectId: "dbaderevidas-9cbd0",
+            storageBucket: "dbaderevidas-9cbd0.firebasestorage.app",
+            messagingSenderId: "762500930740",
+            appId: "1:762500930740:web:ff13ea2685e2db28ec0be1"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Estado da aplicação
+        let currentYear = new Date().getFullYear();
+        let events = [];
+        let currentFilial = null;
+        let currentUser = null;
+        let editingEventId = null;
+        
+        // Elementos da interface
+        const currentYearElement = document.getElementById('current-year');
+        const calendarElement = document.getElementById('calendar');
+        const eventsListElement = document.getElementById('events-list');
+        const eventModal = document.getElementById('event-modal');
+        const eventForm = document.getElementById('event-form');
+        const currentFilialInfo = document.getElementById('current-filial-info');
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário está logado
+            const userData = sessionStorage.getItem('user');
+            
+            if (!userData) {
+                // Redirecionar para login se não estiver logado
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Obter a filial atual
+            const urlParams = new URLSearchParams(window.location.search);
+            const filialId = urlParams.get('filial') || localStorage.getItem('currentFilialId');
+            
+            if (filialId) {
+                loadFilialInfo(filialId);
+            } else {
+                currentFilialInfo.textContent = 'Filial: Não selecionada';
+                showError('Selecione uma filial para visualizar os eventos.');
+            }
+            
+            // Configurar ano atual
+            currentYearElement.textContent = currentYear;
+            
+            // Gerar calendário
+            generateCalendar();
+            
+            // Configurar eventos de interface
+            setupEventListeners();
+        });
+        
+        // Carregar informações da filial
+        async function loadFilialInfo(filialId) {
+            try {
+                const filialDoc = await db.collection('filiais').doc(filialId).get();
+                if (filialDoc.exists) {
+                    currentFilial = filialDoc.data();
+                    currentFilial.id = filialId;
+                    currentFilialInfo.textContent = `Filial: ${currentFilial.congregacao}`;
+                    
+                    // Carregar eventos após carregar a filial
+                    loadEvents();
+                } else {
+                    currentFilialInfo.textContent = 'Filial: Não encontrada';
+                    showError('Filial não encontrada.');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar informações da filial:', error);
+                currentFilialInfo.textContent = 'Filial: Erro ao carregar';
+                showError('Erro ao carregar informações da filial.');
+            }
+        }
+        
+        // Carregar eventos do Firebase (MÉTODO CORRIGIDO)
+        async function loadEvents() {
+            try {
+                if (!currentFilial) {
+                    console.log('Filial não carregada ainda');
+                    return;
+                }
+                
+                document.getElementById('loading').style.display = 'block';
+                console.log('Carregando eventos para filial:', currentFilial.id, 'ano:', currentYear);
+                
+                // CONSULTA SIMPLIFICADA - Carregar todos os eventos da filial e filtrar localmente
+                const eventsSnapshot = await db.collection('eventos')
+                    .where('filialId', '==', currentFilial.id)
+                    .get();
+                
+                events = [];
+                eventsSnapshot.forEach(doc => {
+                    const eventData = doc.data();
+                    eventData.id = doc.id;
+                    
+                    // Filtrar por ano localmente
+                    const eventYear = new Date(eventData.data).getFullYear();
+                    if (eventYear === currentYear) {
+                        events.push(eventData);
+                    }
+                });
+                
+                console.log('Eventos carregados:', events.length);
+                
+                // Ordenar eventos por data
+                events.sort((a, b) => new Date(a.data) - new Date(b.data));
+                
+                updateCalendar();
+                updateEventsList();
+                
+            } catch (error) {
+                console.error('Erro ao carregar eventos:', error);
+                showError('Erro ao carregar eventos: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // Gerar calendário
+        function generateCalendar() {
+            calendarElement.innerHTML = '';
+            
+            const monthNames = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            
+            const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            
+            for (let month = 0; month < 12; month++) {
+                const monthElement = document.createElement('div');
+                monthElement.className = 'month';
+                
+                const monthHeader = document.createElement('div');
+                monthHeader.className = 'month-header';
+                monthHeader.textContent = monthNames[month];
+                monthElement.appendChild(monthHeader);
+                
+                const monthGrid = document.createElement('div');
+                monthGrid.className = 'month-grid';
+                
+                // Adicionar cabeçalhos dos dias
+                dayNames.forEach(dayName => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'day-header';
+                    dayHeader.textContent = dayName;
+                    monthGrid.appendChild(dayHeader);
+                });
+                
+                // Calcular primeiro dia do mês
+                const firstDay = new Date(currentYear, month, 1).getDay();
+                
+                // Adicionar dias vazios no início
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'day empty';
+                    monthGrid.appendChild(emptyDay);
+                }
+                
+                // Adicionar dias do mês
+                const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+                const today = new Date();
+                const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === month;
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'day';
+                    dayElement.textContent = day;
+                    
+                    // Formatar data no formato YYYY-MM-DD
+                    const dateString = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    dayElement.setAttribute('data-date', dateString);
+                    
+                    // Verificar se é hoje
+                    if (isCurrentMonth && day === today.getDate()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    // Adicionar evento de clique
+                    dayElement.addEventListener('click', function() {
+                        const date = this.getAttribute('data-date');
+                        openEventModal(date);
+                    });
+                    
+                    monthGrid.appendChild(dayElement);
+                }
+                
+                monthElement.appendChild(monthGrid);
+                calendarElement.appendChild(monthElement);
+            }
+            
+            // Atualizar calendário com eventos (se já carregados)
+            if (events.length > 0) {
+                updateCalendar();
+            }
+        }
+        
+        // Atualizar calendário com eventos (FUNÇÃO CORRIGIDA)
+        function updateCalendar() {
+            console.log('Atualizando calendário com', events.length, 'eventos');
+            
+            // Remover marcações anteriores
+            document.querySelectorAll('.day.has-event').forEach(day => {
+                day.classList.remove('has-event');
+            });
+            
+            // Marcar dias com eventos
+            events.forEach(event => {
+                const dayElement = document.querySelector(`.day[data-date="${event.data}"]`);
+                if (dayElement) {
+                    dayElement.classList.add('has-event');
+                    console.log('Marcando dia com evento:', event.data, event.titulo);
+                } else {
+                    console.log('Dia não encontrado para evento:', event.data);
+                }
+            });
+        }
+        
+        // Atualizar lista de eventos (FUNÇÃO CORRIGIDA)
+      function updateEventsList() {
+    eventsListElement.innerHTML = '';
+    
+    if (events.length === 0) {
+        eventsListElement.innerHTML = '<p style="text-align: center; color: #666;">Nenhum evento cadastrado para este ano.</p>';
+        return;
+    }
+    
+    events.forEach(event => {
+        // CORREÇÃO: Usar a data exata do Firebase, sem ajustes
+        const eventDate = new Date(event.data + 'T00:00:00'); // ← Adicionar horário para evitar problemas de fuso
+        
+        const formattedDate = eventDate.toLocaleDateString('pt-BR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        const eventItem = document.createElement('div');
+        eventItem.className = 'event-item';
+        
+        eventItem.innerHTML = `
+            <div class="event-info">
+                <h4>${event.titulo}</h4>
+                <div class="event-date">${formattedDate} ${event.horario ? `- ${event.horario}` : ''}</div>
+                <div>${event.local ? `Local: ${event.local}` : ''}</div>
+                ${event.descricao ? `<p style="margin-top: 5px; color: #666;">${event.descricao}</p>` : ''}
+            </div>
+            <div class="event-actions">
+                <button class="action-btn edit" data-id="${event.id}"><i class="fas fa-edit"></i></button>
+                <button class="action-btn delete" data-id="${event.id}"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        
+        eventsListElement.appendChild(eventItem);
+    });
+    
+    // Adicionar eventos aos botões
+    document.querySelectorAll('.action-btn.edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const eventId = this.getAttribute('data-id');
+            editEvent(eventId);
+        });
+    });
+    
+    document.querySelectorAll('.action-btn.delete').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const eventId = this.getAttribute('data-id');
+            deleteEvent(eventId);
+        });
+    });
+}
+        
+        // Abrir modal para adicionar/editar evento
+        function openEventModal(date = '') {
+            editingEventId = null;
+            document.getElementById('modal-title').textContent = 'Adicionar Evento';
+            document.getElementById('event-id').value = '';
+            document.getElementById('event-form').reset();
+            
+            if (date) {
+                document.getElementById('event-date').value = date;
+            }
+            
+            eventModal.style.display = 'flex';
+        }
+        
+        // Editar evento
+     function editEvent(eventId) {
+    const event = events.find(e => e.id === eventId);
+    if (!event) return;
+    
+    editingEventId = eventId;
+    document.getElementById('modal-title').textContent = 'Editar Evento';
+    document.getElementById('event-id').value = eventId;
+    
+    // CORREÇÃO: Usar a data exata do Firebase
+    document.getElementById('event-date').value = event.data; // ← DATA EXATA
+    document.getElementById('event-title').value = event.titulo;
+    document.getElementById('event-time').value = event.horario || '';
+    document.getElementById('event-location').value = event.local || '';
+    document.getElementById('event-description').value = event.descricao || '';
+    document.getElementById('event-type').value = event.tipo || 'culto';
+    
+    eventModal.style.display = 'flex';
+}  
+        // Salvar evento
+       async function saveEvent() {
+    const eventId = document.getElementById('event-id').value;
+    
+    // CORREÇÃO: Usar a data exata do campo, sem ajustes de fuso horário
+    const eventDate = document.getElementById('event-date').value;
+    
+    const eventData = {
+        data: eventDate, // ← USAR A DATA EXATA DO CAMPO
+        titulo: document.getElementById('event-title').value.trim(),
+        horario: document.getElementById('event-time').value,
+        local: document.getElementById('event-location').value.trim(),
+        descricao: document.getElementById('event-description').value.trim(),
+        tipo: document.getElementById('event-type').value,
+        ano: currentYear,
+        filialId: currentFilial.id,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: currentUser.id
+    };
+            
+            // Adicionar createdAt apenas para novos eventos
+            if (!eventId) {
+                eventData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            
+            // Validar dados
+            if (!eventData.data || !eventData.titulo) {
+                showError('Por favor, preencha a data e o título do evento.');
+                return;
+            }
+            
+            // Validar se a filial está carregada
+            if (!currentFilial || !currentFilial.id) {
+                showError('Erro: Filial não carregada corretamente.');
+                return;
+            }
+            
+            try {
+                if (eventId) {
+                    // Atualizar evento existente
+                    await db.collection('eventos').doc(eventId).update(eventData);
+                    showSuccess('Evento atualizado com sucesso!');
+                } else {
+                    // Criar novo evento
+                    await db.collection('eventos').add(eventData);
+                    showSuccess('Evento adicionado com sucesso!');
+                }
+                
+                // Fechar modal e recarregar eventos
+                eventModal.style.display = 'none';
+                loadEvents();
+                
+            } catch (error) {
+                console.error('Erro ao salvar evento:', error);
+                showError('Erro ao salvar evento: ' + error.message);
+            }
+        }
+        
+        // Excluir evento
+        async function deleteEvent(eventId) {
+            if (!confirm('Tem certeza que deseja excluir este evento?')) {
+                return;
+            }
+            
+            try {
+                await db.collection('eventos').doc(eventId).delete();
+                showSuccess('Evento excluído com sucesso!');
+                loadEvents();
+            } catch (error) {
+                console.error('Erro ao excluir evento:', error);
+                showError('Erro ao excluir evento: ' + error.message);
+            }
+        }
+        
+        // Baixar modelo de importação
+       function downloadTemplate() {
+    // Criar dados de exemplo com datas no formato correto
+    const templateData = [
+        ['Data', 'Título', 'Horário', 'Local', 'Descrição', 'Tipo'],
+        ['2023-12-25', 'Natal', '19:00', 'Templo Principal', 'Celebração de Natal', 'culto'],
+        ['2023-12-31', 'Vigília de Ano Novo', '22:00', 'Templo Principal', 'Vigília de Ano Novo', 'culto']
+    ];
+    
+    // Criar planilha
+    const ws = XLSX.utils.aoa_to_sheet(templateData);
+    
+    // CORREÇÃO: Definir formato de data para as células
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        const cellAddress = XLSX.utils.encode_cell({r: R, c: 0}); // Coluna A (Data)
+        if (ws[cellAddress]) {
+            ws[cellAddress].z = 'yyyy-mm-dd'; // Formato de data
+        }
+    }
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Eventos');
+    
+    // Salvar arquivo
+    XLSX.writeFile(wb, 'modelo_importacao_eventos.xlsx');
+}
+        
+        // Importar eventos do Excel
+       function importEvents(file) {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Obter primeira planilha
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            
+            if (jsonData.length === 0) {
+                showError('O arquivo está vazio ou não contém dados válidos.');
+                return;
+            }
+            
+            // DEBUG: Ver os dados
+            debugExcelData(jsonData);
+            
+            // Processar dados
+            processImportedEvents(jsonData);
+            
+        } catch (error) {
+            console.error('Erro ao processar arquivo:', error);
+            showError('Erro ao processar arquivo: ' + error.message);
+        }
+    };
+    
+    reader.readAsArrayBuffer(file);
+}
+        // Processar eventos importados
+      async function processImportedEvents(importedEvents) {
+    try {
+        document.getElementById('loading').style.display = 'block';
+        
+        let successCount = 0;
+        let errorCount = 0;
+        
+        for (const eventData of importedEvents) {
+            try {
+                // Validar dados mínimos
+                if (!eventData.Data || !eventData.Título) {
+                    console.log('Dados mínimos faltando:', eventData);
+                    errorCount++;
+                    continue;
+                }
+                
+                // CORREÇÃO: Lidar com diferentes formatos de data do Excel
+                let eventDate;
+                
+                if (typeof eventData.Data === 'string') {
+                    // Se for string, verificar o formato
+                    if (eventData.Data.includes('/')) {
+                        // Formato brasileiro DD/MM/AAAA
+                        const parts = eventData.Data.split('/');
+                        if (parts.length === 3) {
+                            const day = parts[0].padStart(2, '0');
+                            const month = parts[1].padStart(2, '0');
+                            const year = parts[2];
+                            eventDate = `${year}-${month}-${day}`;
+                        } else {
+                            errorCount++;
+                            continue;
+                        }
+                    } else if (eventData.Data.includes('-')) {
+                        // Formato AAAA-MM-DD
+                        eventDate = eventData.Data;
+                    } else {
+                        errorCount++;
+                        continue;
+                    }
+                } else if (eventData.Data instanceof Date) {
+                    // Se for objeto Date do Excel
+                    const year = eventData.Data.getFullYear();
+                    const month = String(eventData.Data.getMonth() + 1).padStart(2, '0');
+                    const day = String(eventData.Data.getDate()).padStart(2, '0');
+                    eventDate = `${year}-${month}-${day}`;
+                } else if (typeof eventData.Data === 'number') {
+                    // Se for número serial do Excel (número de dias desde 1900-01-01)
+                    const excelDate = eventData.Data;
+                    const baseDate = new Date(1900, 0, 1);
+                    const actualDate = new Date(baseDate.getTime() + (excelDate - 1) * 24 * 60 * 60 * 1000);
+                    
+                    const year = actualDate.getFullYear();
+                    const month = String(actualDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(actualDate.getDate()).padStart(2, '0');
+                    eventDate = `${year}-${month}-${day}`;
+                } else {
+                    console.log('Formato de data não reconhecido:', eventData.Data);
+                    errorCount++;
+                    continue;
+                }
+                
+                // Validar formato da data
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!dateRegex.test(eventDate)) {
+                    console.log('Data em formato inválido:', eventDate);
+                    errorCount++;
+                    continue;
+                }
+                
+                // Validar se é uma data real
+                const testDate = new Date(eventDate + 'T00:00:00');
+                if (isNaN(testDate.getTime())) {
+                    console.log('Data inválida:', eventDate);
+                    errorCount++;
+                    continue;
+                }
+                
+                console.log('Processando evento:', eventData.Título, 'Data:', eventDate);
+                
+                // Verificar se o evento já existe
+                const existingEvent = await db.collection('eventos')
+                    .where('filialId', '==', currentFilial.id)
+                    .where('data', '==', eventDate)
+                    .where('titulo', '==', eventData.Título)
+                    .get();
+                
+                if (!existingEvent.empty) {
+                    console.log('Evento já existe:', eventData.Título);
+                    continue;
+                }
+                
+                // Criar evento
+                await db.collection('eventos').add({
+                    data: eventDate,
+                    titulo: eventData.Título,
+                    horario: eventData.Horário || '',
+                    local: eventData.Local || '',
+                    descricao: eventData.Descrição || '',
+                    tipo: eventData.Tipo || 'culto',
+                    ano: parseInt(eventDate.split('-')[0]),
+                    filialId: currentFilial.id,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: currentUser.id
+                });
+                
+                successCount++;
+                console.log('Evento salvo com sucesso:', eventData.Título);
+                
+            } catch (error) {
+                console.error('Erro ao importar evento:', error, eventData);
+                errorCount++;
+            }
+        }
+        
+        showSuccess(`Importação concluída: ${successCount} eventos importados, ${errorCount} erros.`);
+        loadEvents();
+        
+    } catch (error) {
+        console.error('Erro no processo de importação:', error);
+        showError('Erro durante a importação: ' + error.message);
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+    }
+}
+
+// Função para debug - ver o que está vindo do Excel
+function debugExcelData(importedEvents) {
+    console.log('=== DEBUG EXCEL DATA ===');
+    importedEvents.forEach((event, index) => {
+        console.log(`Evento ${index + 1}:`, event);
+        console.log(`Tipo da data:`, typeof event.Data);
+        console.log(`Valor da data:`, event.Data);
+        if (event.Data instanceof Date) {
+            console.log(`Data como Date:`, event.Data.toString());
+        }
+    });
+    console.log('=== FIM DEBUG ===');
+}
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Navegação de anos
+            document.getElementById('prev-year').addEventListener('click', function() {
+                currentYear--;
+                currentYearElement.textContent = currentYear;
+                loadEvents();
+                generateCalendar();
+            });
+            
+            document.getElementById('next-year').addEventListener('click', function() {
+                currentYear++;
+                currentYearElement.textContent = currentYear;
+                loadEvents();
+                generateCalendar();
+            });
+            
+            // Botão adicionar evento
+            document.getElementById('add-event').addEventListener('click', function() {
+                if (!currentFilial) {
+                    showError('Selecione uma filial antes de adicionar eventos.');
+                    return;
+                }
+                openEventModal();
+            });
+            
+            // Modal
+            document.getElementById('close-modal').addEventListener('click', function() {
+                eventModal.style.display = 'none';
+            });
+            
+            document.getElementById('cancel-event').addEventListener('click', function() {
+                eventModal.style.display = 'none';
+            });
+            
+            document.getElementById('save-event').addEventListener('click', saveEvent);
+            
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', function(event) {
+                if (event.target === eventModal) {
+                    eventModal.style.display = 'none';
+                }
+            });
+            
+            // Importação/exportação
+            document.getElementById('download-template').addEventListener('click', downloadTemplate);
+            
+            document.getElementById('import-events').addEventListener('click', function() {
+                if (!currentFilial) {
+                    showError('Selecione uma filial antes de importar eventos.');
+                    return;
+                }
+                document.getElementById('file-input').click();
+            });
+            
+            document.getElementById('file-input').addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    importEvents(e.target.files[0]);
+                    // Limpar input para permitir nova seleção do mesmo arquivo
+                    e.target.value = '';
+                }
+            });
+            
+            // Logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if(confirm('Deseja realmente sair do sistema?')) {
+                    sessionStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+        
+        // Funções de alerta
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('success-alert').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('success-alert').style.display = 'none';
+            }, 5000);
+        }
+        
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-alert').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('error-alert').style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

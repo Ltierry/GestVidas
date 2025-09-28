@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Principal - Ministério Resgatando Vidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header e Navegação */
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .header-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+        }
+        
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Seletor de Filial */
+        .filial-selector {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin-right: 15px;
+            cursor: pointer;
+            position: relative;
+            min-width: 200px;
+        }
+        
+        .filial-current {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filial-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 20;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .filial-dropdown.active {
+            display: block;
+        }
+        
+        .filial-option {
+            padding: 10px 15px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .filial-option:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .filial-option.active {
+            background-color: #e6f2ff;
+            color: #1a2a6c;
+            font-weight: 600;
+        }
+        
+        /* Menu de Navegação */
+        nav {
+            background-color: #2c3e50;
+            padding: 0 20px;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .menu {
+            list-style-type: none;
+            display: flex;
+        }
+        
+        .menu-item {
+            position: relative;
+        }
+        
+        .menu-item > a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-item > a:hover {
+            background-color: #34495e;
+        }
+        
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 5px 5px;
+            display: none;
+            z-index: 10;
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+            position: relative;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .menu-item:hover .dropdown {
+            display: block;
+        }
+        
+        /* Submenu para Movimentos */
+        .submenu-trigger {
+            position: relative;
+        }
+        
+        .submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 0 5px 5px 5px;
+            display: none;
+            z-index: 11;
+        }
+        
+        .submenu-trigger:hover .submenu {
+            display: block;
+        }
+        
+        .submenu .dropdown-item {
+            padding: 12px 15px;
+        }
+        
+        .has-submenu::after {
+            content: "›";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+        }
+        
+        /* Conteúdo Principal */
+        .main-content {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .welcome-card {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+        
+        .welcome-card h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-card p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a2a6c;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #1a2a6c;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                margin-top: 15px;
+            }
+            
+            .filial-selector {
+                margin: 10px 0;
+                width: 100%;
+            }
+            
+            .menu {
+                flex-direction: column;
+            }
+            
+            .dropdown {
+                position: static;
+                width: 100%;
+                display: none;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .submenu {
+                position: static;
+                width: 100%;
+                display: none;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .menu-item:hover .dropdown {
+                display: none;
+            }
+            
+            .menu-item.active .dropdown {
+                display: block;
+            }
+            
+            .submenu-trigger.active .submenu {
+                display: block;
+            }
+            
+            .has-submenu::after {
+                content: "▼";
+                font-size: 12px;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
+                <div class="header-title">Resgatando Vidas</div>
+            </div>
+            <div class="user-info">
+                <!-- Seletor de Filial -->
+                <div class="filial-selector" id="filial-selector">
+                    <div class="filial-current">
+                        <span id="current-filial">Carregando filiais...</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="filial-dropdown" id="filial-dropdown">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Carregando filiais...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <span id="user-name">Bem-vindo, Administrador</span>
+                <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="nav-container">
+            <ul class="menu">
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-home"></i> Início</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-database"></i> Cadastro <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown">
+                        <a href="add_usuario.html" class="dropdown-item" data-page="add_usuario.html"><i class="fas fa-user"></i> Usuário</a>
+                        <a href="perfil.html" class="dropdown-item" data-page="perfil.html"><i class="fas fa-id-card"></i> Perfil</a>
+                        <a href="add_filiais.html" class="dropdown-item" data-page="add_filiais.html"><i class="fas fa-church"></i> Filiais</a>
+                        <a href="assinaturas.html" class="dropdown-item" data-page="assinaturas.html"><i class="fas fa-signature"></i> Assinaturas</a>
+                        
+                        <div class="dropdown-item submenu-trigger has-submenu">
+                            <i class="fas fa-money-bill-wave"></i> Financeiro
+                            <div class="submenu">
+                                <a href="caixa.html" class="dropdown-item" data-page="caixa.html"><i class="fas fa-cash-register"></i> Caixa</a>
+                                <a href="tesoureiro.html" class="dropdown-item" data-page="tesoureiro.html"><i class="fas fa-user-tie"></i> Tesoureiro</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-clipboard-list"></i> Secretaria <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown">
+                        <a href="geralsecretaria.html" class="dropdown-item" data-page="geralsecretaria.html"><i class="fas fa-cogs"></i> Geral</a>
+                        <a href="membros.html" class="dropdown-item" data-page="membros.html"><i class="fas fa-users"></i> Membros</a>
+                        <a href="documentos.html" class="dropdown-item" data-page="documentos.html"><i class="fas fa-file-alt"></i> Documentos</a>
+                        <a href="relatorios.html" class="dropdown-item" data-page="relatorios.html"><i class="fas fa-chart-bar"></i> Relatórios</a>
+                    </div>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-calculator"></i> Tesouraria <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown">
+                        <a href="geral.html" class="dropdown-item" data-page="geral.html"><i class="fas fa-cash-register"></i> Geral</a>
+                        
+                        <div class="dropdown-item submenu-trigger has-submenu">
+                            <i class="fas fa-exchange-alt"></i> Movimentos
+                            <div class="submenu">
+                                <a href="dizofer.html" class="dropdown-item" data-page="dizofer.html"><i class="fas fa-hand-holding-usd"></i> Dízimos/Ofertas</a>
+                                <a href="entrada.html" class="dropdown-item" data-page="entrada.html"><i class="fas fa-sign-in-alt"></i> Entrada</a>
+                                <a href="saida.html" class="dropdown-item" data-page="saida.html"><i class="fas fa-sign-out-alt"></i> Saída</a>
+                                <a href="transferencias.html" class="dropdown-item" data-page="transferencias.html"><i class="fas fa-exchange-alt"></i> Transferências</a>
+                                <a href="contasapagar.html" class="dropdown-item" data-page="contasapagar.html"><i class="fas fa-money-bill-wave"></i> Contas a Pagar</a>
+                            </div>
+                        </div>
+                        
+                        <a href="documentos.html" class="dropdown-item" data-page="documentos.html"><i class="fas fa-file-alt"></i> Documentos</a>
+                        <a href="relatorios.html" class="dropdown-item" data-page="relatorios.html"><i class="fas fa-chart-bar"></i> Relatórios</a>
+                        <a href="contabilidade.html" class="dropdown-item" data-page="contabilidade.html"><i class="fas fa-balance-scale"></i> Contabilidade</a>
+                    </div>
+                </li>
+                <!-- Menu Eventos com Agenda Anual -->
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-calendar-alt"></i> Eventos <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown">
+                        <div class="dropdown-item submenu-trigger has-submenu">
+                            <i class="fas fa-tasks"></i> Controle
+                            <div class="submenu">
+                                <a href="anuncio.html" class="dropdown-item" data-page="anuncio.html"><i class="fas fa-bullhorn"></i> Anúncio da Semana</a>
+                            </div>
+                        </div>
+                        <!-- Adicionado Agenda Anual -->
+                        <a href="agendaanual.html" class="dropdown-item" data-page="agendaanual.html"><i class="fas fa-calendar-day"></i> Agenda Anual</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="welcome-card">
+            <h1 id="welcome-title">Bem-vindo ao Sistema de Gestão</h1>
+            <p id="filial-info">Use o menu acima para navegar pelas funcionalidades do sistema</p>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h2>Informações da Filial</h2>
+                <div id="filial-details">
+                    <p>Selecione uma filial para visualizar suas informações</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Estatísticas da Filial</h2>
+                <div class="stats-grid" id="filial-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Membros</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Eventos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">R$ 0</div>
+                        <div class="stat-label">Dízimos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">R$ 0</div>
+                        <div class="stat-label">Ofertas</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Próximos Eventos</h2>
+                <div id="filial-events">
+                    <p>Nenhum evento programado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2025</p>
+    </footer>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNmIm9kem9yKp9skGS2HKHwqaauK36aps",
+            authDomain: "dbaderevidas-9cbd0.firebaseapp.com",
+            projectId: "dbaderevidas-9cbd0",
+            storageBucket: "dbaderevidas-9cbd0.firebasestorage.app",
+            messagingSenderId: "762500930740",
+            appId: "1:762500930740:web:ff13ea2685e2db28ec0be1"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Estado atual da aplicação
+        let currentFilial = null;
+        let filiais = [];
+        let currentUser = null;
+
+        // Elementos da interface
+        const filialSelector = document.getElementById('filial-selector');
+        const currentFilialSpan = document.getElementById('current-filial');
+        const filialDropdown = document.getElementById('filial-dropdown');
+        const userNameSpan = document.getElementById('user-name');
+        const welcomeTitle = document.getElementById('welcome-title');
+        const filialInfo = document.getElementById('filial-info');
+        const filialDetails = document.getElementById('filial-details');
+        const filialStats = document.getElementById('filial-stats');
+        const filialEvents = document.getElementById('filial-events');
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário está logado
+            const userData = sessionStorage.getItem('user');
+            
+            if (!userData) {
+                // Redirecionar para login se não estiver logado
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            userNameSpan.textContent = `Bem-vindo, ${currentUser.fullname || 'Administrador'}`;
+            
+            // Carregar lista de filiais do Firebase
+            loadFiliaisFromFirebase();
+            
+            // Verificar se há uma filial selecionada anteriormente
+            const savedFilialId = localStorage.getItem('currentFilialId');
+            if (savedFilialId) {
+                // A filial será selecionada após o carregamento
+            }
+            
+            // Adicionar eventos
+            setupEventListeners();
+        });
+
+        // Carregar filiais do Firebase
+        async function loadFiliaisFromFirebase() {
+            try {
+                currentFilialSpan.textContent = 'Carregando filiais...';
+                
+                const filiaisSnapshot = await db.collection('filiais')
+                    .orderBy('congregacao')
+                    .get();
+                
+                if (filiaisSnapshot.empty) {
+                    currentFilialSpan.textContent = 'Nenhuma filial cadastrada';
+                    filialDropdown.innerHTML = '<div class="filial-option">Nenhuma filial cadastrada</div>';
+                    return;
+                }
+                
+                filiais = [];
+                filiaisSnapshot.forEach(doc => {
+                    const filialData = doc.data();
+                    filialData.id = doc.id;
+                    filiais.push(filialData);
+                });
+                
+                // Atualizar dropdown
+                updateFilialDropdown();
+                
+                // Verificar se há uma filial salva
+                const savedFilialId = localStorage.getItem('currentFilialId');
+                if (savedFilialId) {
+                    const savedFilial = filiais.find(f => f.id === savedFilialId);
+                    if (savedFilial) {
+                        selectFilial(savedFilial);
+                    } else {
+                        // Se a filial salva não existe mais, selecionar a primeira
+                        selectFilial(filiais[0]);
+                    }
+                } else if (filiais.length > 0) {
+                    // Selecionar a primeira filial por padrão
+                    selectFilial(filiais[0]);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar filiais:', error);
+                currentFilialSpan.textContent = 'Erro ao carregar filiais';
+                filialDropdown.innerHTML = '<div class="filial-option" style="color: #b21f1f;">Erro ao carregar filiais</div>';
+            }
+        }
+
+        // Atualizar dropdown com as filiais
+        function updateFilialDropdown() {
+            filialDropdown.innerHTML = '';
+            
+            if (filiais.length === 0) {
+                filialDropdown.innerHTML = '<div class="filial-option">Nenhuma filial cadastrada</div>';
+                return;
+            }
+            
+            filiais.forEach(filial => {
+                const option = document.createElement('div');
+                option.className = 'filial-option';
+                if (currentFilial && currentFilial.id === filial.id) {
+                    option.classList.add('active');
+                }
+                option.textContent = filial.congregacao;
+                option.setAttribute('data-id', filial.id);
+                
+                option.addEventListener('click', function() {
+                    selectFilial(filial);
+                    filialDropdown.classList.remove('active');
+                });
+                
+                filialDropdown.appendChild(option);
+            });
+        }
+
+        // Selecionar uma filial
+        function selectFilial(filial) {
+            currentFilial = filial;
+            currentFilialSpan.textContent = filial.congregacao;
+            
+            // Salvar seleção no localStorage
+            localStorage.setItem('currentFilialId', filial.id);
+            
+            // Atualizar interface
+            updateInterface();
+            
+            // Recarregar lista para atualizar o item ativo
+            updateFilialDropdown();
+        }
+
+        // Atualizar interface com informações da filial selecionada
+        function updateInterface() {
+            if (!currentFilial) return;
+            
+            // Atualizar título e informações
+            welcomeTitle.textContent = `Bem-vindo à ${currentFilial.congregacao}`;
+            
+            // Converter tipo para texto legível
+            let tipoText = '';
+            switch(currentFilial.tipo) {
+                case 'matriz':
+                    tipoText = 'Matriz';
+                    break;
+                case 'congregacao':
+                    tipoText = 'Congregação';
+                    break;
+                case 'ponto-pregacao':
+                    tipoText = 'Ponto de Pregação';
+                    break;
+                default:
+                    tipoText = currentFilial.tipo;
+            }
+            
+            filialInfo.textContent = `Gerenciando dados da ${tipoText}`;
+            
+            // Atualizar detalhes da filial
+            filialDetails.innerHTML = `
+                <p><strong>Pastor Local:</strong> ${currentFilial.pastorLocal || 'Não informado'}</p>
+                <p><strong>Endereço:</strong> ${currentFilial.endereco || 'Não informado'}</p>
+                <p><strong>CNPJ:</strong> ${currentFilial.cnpj || 'Não informado'}</p>
+                <p><strong>Tipo:</strong> ${tipoText}</p>
+            `;
+            
+            // Carregar estatísticas da filial (será implementado posteriormente)
+            loadFilialStats(currentFilial.id);
+        }
+
+        // Carregar estatísticas da filial (para implementação futura)
+        async function loadFilialStats(filialId) {
+            // Esta função será implementada quando tivermos as coleções de membros, eventos, etc.
+            // Por enquanto, vamos usar valores padrão
+            const statValues = filialStats.querySelectorAll('.stat-value');
+            statValues[0].textContent = '0';
+            statValues[1].textContent = '0';
+            statValues[2].textContent = 'R$ 0';
+            statValues[3].textContent = 'R$ 0';
+            
+            // Simular carregamento de eventos
+            filialEvents.innerHTML = `<p>Carregando eventos...</p>`;
+            
+            // Simular delay de carregamento
+            setTimeout(() => {
+                filialEvents.innerHTML = `
+                    <p>Próximo evento: Culto de Celebração - Domingo às 19h</p>
+                    <p>Eventos desta semana: 2</p>
+                `;
+            }, 1000);
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Abrir/fechar dropdown de filiais
+            filialSelector.addEventListener('click', function(e) {
+                e.stopPropagation();
+                filialDropdown.classList.toggle('active');
+            });
+            
+            // Fechar dropdown ao clicar fora
+            document.addEventListener('click', function() {
+                filialDropdown.classList.remove('active');
+            });
+            
+            // Adicionar funcionalidade ao botão de logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if(confirm('Deseja realmente sair do sistema?')) {
+                    // Limpar sessão antes de sair
+                    sessionStorage.removeItem('user');
+                    localStorage.removeItem('currentFilialId');
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            // Tornar o menu responsivo
+            document.querySelectorAll('.menu-item > a').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if(window.innerWidth <= 768) {
+                        e.preventDefault();
+                        document.querySelectorAll('.menu-item').forEach(menuItem => {
+                            menuItem.classList.remove('active');
+                        });
+                        this.parentElement.classList.toggle('active');
+                    }
+                });
+            });
+            
+            // Adicionar funcionalidade para clicar em "Movimentos" em dispositivos móveis
+            document.querySelectorAll('.submenu-trigger').forEach(trigger => {
+                trigger.addEventListener('click', function(e) {
+                    if(window.innerWidth <= 768) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.classList.toggle('active');
+                    }
+                });
+            });
+            
+            // Adicionar funcionalidade para abrir as telas do menu usando data attributes
+            document.querySelectorAll('.dropdown-item[data-page]').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    if (page) {
+                        // Adicionar parâmetro da filial atual à URL
+                        const filialParam = currentFilial ? `?filial=${currentFilial.id}` : '';
+                        window.location.href = page + filialParam;
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

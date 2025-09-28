@@ -68,7 +68,7 @@
             margin-right: 15px;
         }
         
-        .logout-btn {
+        .logout-btn, .back-btn {
             background-color: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
@@ -76,76 +76,16 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-left: 10px;
         }
         
-        .logout-btn:hover {
+        .logout-btn:hover, .back-btn:hover {
             background-color: rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Menu de Navegação */
-        nav {
-            background-color: #2c3e50;
-            padding: 0 20px;
-        }
-        
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .menu {
-            list-style-type: none;
-            display: flex;
-        }
-        
-        .menu-item {
-            position: relative;
-        }
-        
-        .menu-item > a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 15px 20px;
-            transition: background-color 0.3s;
-        }
-        
-        .menu-item > a:hover {
-            background-color: #34495e;
-        }
-        
-        .dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            border-radius: 0 0 5px 5px;
-            display: none;
-            z-index: 10;
-        }
-        
-        .dropdown-item {
-            display: block;
-            padding: 12px 20px;
-            color: #333;
-            text-decoration: none;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.3s;
-        }
-        
-        .dropdown-item:hover {
-            background-color: #f0f0f0;
-        }
-        
-        .menu-item:hover .dropdown {
-            display: block;
         }
         
         /* Conteúdo Principal */
         .main-content {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 30px auto;
             padding: 0 20px;
         }
@@ -157,12 +97,19 @@
             border-bottom: 2px solid #f0f0f0;
         }
         
-        .form-card {
+        .card {
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             padding: 30px;
             margin-bottom: 30px;
+        }
+        
+        .card-title {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
         }
         
         .form-group {
@@ -337,24 +284,9 @@
                 margin-bottom: 15px;
             }
             
-            .menu {
+            .user-info {
                 flex-direction: column;
-            }
-            
-            .dropdown {
-                position: static;
-                width: 100%;
-                display: none;
-                box-shadow: none;
-                border-radius: 0;
-            }
-            
-            .menu-item:hover .dropdown {
-                display: none;
-            }
-            
-            .menu-item.active .dropdown {
-                display: block;
+                margin-top: 15px;
             }
             
             .btn-container {
@@ -369,6 +301,15 @@
             .btn-secondary {
                 margin-right: 0;
             }
+            
+            .users-table {
+                font-size: 14px;
+            }
+            
+            .users-table th, 
+            .users-table td {
+                padding: 8px 10px;
+            }
         }
     </style>
 </head>
@@ -377,52 +318,21 @@
         <div class="header-content">
             <div class="logo-container">
                 <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
-                <div class="header-title">Igreja Adere Vidas</div>
+                <div class="header-title">Cadastro de Usuário - Igreja Adere Vidas</div>
             </div>
             <div class="user-info">
-                <span>Bem-vindo, Administrador</span>
+                <span id="current-filial-info">Filial: Carregando...</span>
+                <button class="back-btn" onclick="window.location.href='main.html'"><i class="fas fa-arrow-left"></i> Voltar</button>
                 <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
             </div>
         </div>
     </header>
     
-    <nav>
-        <div class="nav-container">
-            <ul class="menu">
-                <li class="menu-item">
-                    <a href="main.html"><i class="fas fa-home"></i> Início</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-church"></i> Ministérios</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-calendar-alt"></i> Eventos</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-users"></i> Membros</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-file-alt"></i> Relatórios</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-cogs"></i> Configurações</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-database"></i> Cadastro <i class="fas fa-chevron-down"></i></a>
-                    <div class="dropdown">
-                        <a href="add_usuario.html" class="dropdown-item"><i class="fas fa-user"></i> Usuário</a>
-                        <a href="#" class="dropdown-item"><i class="fas fa-id-card"></i> Perfil</a>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    
     <div class="main-content">
         <h1 class="page-title">Cadastro de Usuário</h1>
         
         <div class="alert alert-success" id="success-alert">
-            <i class="fas fa-check-circle"></i> Usuário cadastrado com sucesso!
+            <i class="fas fa-check-circle"></i> <span id="success-message">Usuário cadastrado com sucesso!</span>
         </div>
         
         <div class="alert alert-error" id="error-alert">
@@ -434,7 +344,8 @@
             <p>Salvando usuário...</p>
         </div>
         
-        <div class="form-card">
+        <div class="card">
+            <h2 class="card-title">Novo Usuário</h2>
             <form id="user-form">
                 <div class="form-group">
                     <label for="username">Nome de Usuário *</label>
@@ -475,6 +386,14 @@
                         <option value="guest">Convidado</option>
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label for="filial-access">Acesso à Filial</label>
+                    <select id="filial-access" class="form-control" multiple style="height: 120px;">
+                        <option value="">Carregando filiais...</option>
+                    </select>
+                    <small style="color: #666;">Segure Ctrl para selecionar múltiplas filiais</small>
+                </div>
                 
                 <div class="btn-container">
                     <button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button>
@@ -483,8 +402,8 @@
             </form>
         </div>
         
-        <div class="form-card">
-            <h2>Usuários Cadastrados</h2>
+        <div class="card">
+            <h2 class="card-title">Usuários Cadastrados</h2>
             <div class="loading" id="loading-users">
                 <div class="loading-spinner"></div>
                 <p>Carregando usuários...</p>
@@ -495,6 +414,7 @@
                         <th>Nome de Usuário</th>
                         <th>Nome Completo</th>
                         <th>Perfil</th>
+                        <th>Filial</th>
                         <th>Data de Criação</th>
                         <th>Ações</th>
                     </tr>
@@ -507,7 +427,7 @@
     </div>
     
     <footer>
-        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2023</p>
+        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2025</p>
     </footer>
 
     <script>
@@ -525,6 +445,11 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
+        // Estado da aplicação
+        let currentFilial = null;
+        let filiais = [];
+        let currentUser = null;
+        
         // Elementos da interface
         const userForm = document.getElementById('user-form');
         const usernameInput = document.getElementById('username');
@@ -532,50 +457,139 @@
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirm-password');
         const profileSelect = document.getElementById('profile');
+        const filialAccessSelect = document.getElementById('filial-access');
         const successAlert = document.getElementById('success-alert');
         const errorAlert = document.getElementById('error-alert');
+        const successMessage = document.getElementById('success-message');
         const errorMessage = document.getElementById('error-message');
         const usersList = document.getElementById('users-list');
         const togglePasswordBtn = document.getElementById('toggle-password');
         const toggleConfirmPasswordBtn = document.getElementById('toggle-confirm-password');
         const loading = document.getElementById('loading');
         const loadingUsers = document.getElementById('loading-users');
+        const currentFilialInfo = document.getElementById('current-filial-info');
         
-        // Adicionar funcionalidade ao botão de logout
-        document.querySelector('.logout-btn').addEventListener('click', function() {
-            if(confirm('Deseja realmente sair do sistema?')) {
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário está logado
+            const userData = sessionStorage.getItem('user');
+            
+            if (!userData) {
                 window.location.href = 'index.html';
+                return;
             }
-        });
-        
-        // Botão cancelar
-        document.getElementById('cancel-btn').addEventListener('click', function() {
-            userForm.reset();
-        });
-        
-        // Mostrar/ocultar senha
-        togglePasswordBtn.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                togglePasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            
+            currentUser = JSON.parse(userData);
+            
+            // Obter a filial atual da URL ou localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const filialId = urlParams.get('filial') || localStorage.getItem('currentFilialId');
+            
+            if (filialId) {
+                loadFilialInfo(filialId);
             } else {
-                passwordInput.type = 'password';
-                togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                currentFilialInfo.textContent = 'Filial: Não selecionada';
+                showError('Selecione uma filial para visualizar os usuários.');
             }
+            
+            // Configurar eventos
+            setupEventListeners();
         });
         
-        toggleConfirmPasswordBtn.addEventListener('click', function() {
-            if (confirmPasswordInput.type === 'password') {
-                confirmPasswordInput.type = 'text';
-                toggleConfirmPasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            } else {
-                confirmPasswordInput.type = 'password';
-                toggleConfirmPasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+        // Carregar informações da filial - IGUAL AO ANUNCIO.HTML
+        async function loadFilialInfo(filialId) {
+            try {
+                const filialDoc = await db.collection('filiais').doc(filialId).get();
+                if (filialDoc.exists) {
+                    currentFilial = filialDoc.data();
+                    currentFilial.id = filialId;
+                    currentFilialInfo.textContent = `Filial: ${currentFilial.congregacao}`;
+                    
+                    // Carregar todas as filiais para o select
+                    const filiaisSnapshot = await db.collection('filiais').orderBy('congregacao').get();
+                    filiais = [];
+                    filiaisSnapshot.forEach(doc => {
+                        const filialData = doc.data();
+                        filialData.id = doc.id;
+                        filiais.push(filialData);
+                    });
+                    
+                    // Atualizar select de acesso à filial
+                    updateFilialAccessSelect();
+                    
+                    // Carregar usuários após ter a filial
+                    loadUsers();
+                } else {
+                    currentFilialInfo.textContent = 'Filial: Não encontrada';
+                    showError('Filial não encontrada.');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar informações da filial:', error);
+                currentFilialInfo.textContent = 'Filial: Erro ao carregar';
+                showError('Erro ao carregar informações da filial.');
             }
-        });
+        }
         
-        // Validar e enviar formulário
-        userForm.addEventListener('submit', async function(e) {
+        // Atualizar select de acesso à filial
+        function updateFilialAccessSelect() {
+            filialAccessSelect.innerHTML = '';
+            
+            if (filiais.length === 0) {
+                filialAccessSelect.innerHTML = '<option value="">Nenhuma filial cadastrada</option>';
+                return;
+            }
+            
+            filiais.forEach(filial => {
+                const option = document.createElement('option');
+                option.value = filial.id;
+                option.textContent = filial.congregacao;
+                filialAccessSelect.appendChild(option);
+            });
+        }
+        
+        // Configurar eventos
+        function setupEventListeners() {
+            // Logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if(confirm('Deseja realmente sair do sistema?')) {
+                    sessionStorage.removeItem('user');
+                    localStorage.removeItem('currentFilialId');
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            // Mostrar/ocultar senha
+            togglePasswordBtn.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    togglePasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                } else {
+                    passwordInput.type = 'password';
+                    togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                }
+            });
+            
+            toggleConfirmPasswordBtn.addEventListener('click', function() {
+                if (confirmPasswordInput.type === 'password') {
+                    confirmPasswordInput.type = 'text';
+                    toggleConfirmPasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                } else {
+                    confirmPasswordInput.type = 'password';
+                    toggleConfirmPasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                }
+            });
+            
+            // Cancelar
+            document.getElementById('cancel-btn').addEventListener('click', function() {
+                userForm.reset();
+            });
+            
+            // Formulário
+            userForm.addEventListener('submit', handleFormSubmit);
+        }
+        
+        // Manipular envio do formulário
+        async function handleFormSubmit(e) {
             e.preventDefault();
             
             // Validar campos
@@ -584,24 +598,22 @@
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
             const profile = profileSelect.value;
+            const selectedFilials = Array.from(filialAccessSelect.selectedOptions).map(option => option.value);
             
             // Esconder alertas
-            successAlert.style.display = 'none';
-            errorAlert.style.display = 'none';
+            hideAlerts();
             
-            // Validar se as senhas coincidem
+            // Validações
             if (password !== confirmPassword) {
                 showError('As senhas não coincidem.');
                 return;
             }
             
-            // Validar força da senha
             if (password.length < 6) {
                 showError('A senha deve ter pelo menos 6 caracteres.');
                 return;
             }
             
-            // Mostrar loading
             loading.style.display = 'block';
             
             try {
@@ -614,81 +626,72 @@
                     throw new Error('Este nome de usuário já está em uso.');
                 }
                 
-                // Criar hash da senha (em produção, use uma biblioteca como bcrypt)
-                // Nota: Em um sistema real, você deve usar uma função de hash adequada no backend
-                const passwordHash = await hashPassword(password);
+                // Criar usuário no Firebase Auth
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(username + '@aderevidas.com', password);
+                const firebaseUser = userCredential.user;
                 
                 // Salvar usuário no Firestore
-                await db.collection('users').add({
+                await db.collection('users').doc(firebaseUser.uid).set({
                     username: username,
                     fullname: fullname,
-                    password: passwordHash, // Em produção, nunca armazene senhas em texto puro
                     profile: profile,
+                    filiais: selectedFilials,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                // Mostrar mensagem de sucesso
-                successAlert.style.display = 'block';
+                // Fazer logout do usuário criado (manter o admin logado)
+                await firebase.auth().signOut();
                 
-                // Limpar formulário
+                showSuccess('Usuário cadastrado com sucesso!');
                 userForm.reset();
-                
-                // Atualizar lista de usuários
                 loadUsers();
                 
-                // Rolar para o topo para ver a mensagem de sucesso
-                window.scrollTo(0, 0);
             } catch (error) {
+                console.error('Erro ao cadastrar usuário:', error);
                 showError(error.message);
             } finally {
-                // Esconder loading
                 loading.style.display = 'none';
             }
-        });
-        
-        // Função para exibir mensagem de erro
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorAlert.style.display = 'block';
-            
-            // Rolar para o topo para ver a mensagem de erro
-            window.scrollTo(0, 0);
         }
         
-        // Função para carregar usuários do Firestore
+        // Carregar usuários
         async function loadUsers() {
             try {
                 loadingUsers.style.display = 'block';
                 usersList.innerHTML = '';
                 
-                const usersSnapshot = await db.collection('users')
-                    .orderBy('createdAt', 'desc')
-                    .get();
+                const usersSnapshot = await db.collection('users').get();
                 
                 if (usersSnapshot.empty) {
-                    usersList.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum usuário cadastrado</td></tr>';
+                    usersList.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum usuário cadastrado</td></tr>';
                     return;
                 }
                 
-                usersSnapshot.forEach(doc => {
+                for (const doc of usersSnapshot.docs) {
                     const user = doc.data();
                     const row = document.createElement('tr');
                     
-                    // Converter código do perfil para texto
+                    // Converter perfil para texto
                     let profileText = '';
                     switch(user.profile) {
-                        case 'admin':
-                            profileText = 'Administrador';
-                            break;
-                        case 'user':
-                            profileText = 'Usuário';
-                            break;
-                        case 'guest':
-                            profileText = 'Convidado';
-                            break;
-                        default:
-                            profileText = user.profile;
+                        case 'admin': profileText = 'Administrador'; break;
+                        case 'user': profileText = 'Usuário'; break;
+                        case 'guest': profileText = 'Convidado'; break;
+                        default: profileText = user.profile;
+                    }
+                    
+                    // Obter nomes das filiais
+                    let filiaisText = 'Todas';
+                    if (user.filiais && user.filiais.length > 0) {
+                        const filialNames = [];
+                        for (const filialId of user.filiais) {
+                            const filial = filiais.find(f => f.id === filialId);
+                            if (filial) {
+                                filialNames.push(filial.congregacao);
+                            }
+                        }
+                        filiaisText = filialNames.join(', ');
                     }
                     
                     // Formatar data
@@ -700,6 +703,7 @@
                         <td>${user.username}</td>
                         <td>${user.fullname}</td>
                         <td>${profileText}</td>
+                        <td>${filiaisText}</td>
                         <td>${createdAt}</td>
                         <td>
                             <button class="action-btn" data-id="${doc.id}"><i class="fas fa-edit"></i></button>
@@ -708,9 +712,9 @@
                     `;
                     
                     usersList.appendChild(row);
-                });
+                }
                 
-                // Adicionar event listeners para os botões de ação
+                // Event listeners para botões de ação
                 document.querySelectorAll('.action-btn.delete').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const userId = this.getAttribute('data-id');
@@ -720,13 +724,13 @@
                 
             } catch (error) {
                 console.error('Erro ao carregar usuários:', error);
-                usersList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b21f1f;">Erro ao carregar usuários</td></tr>';
+                usersList.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #b21f1f;">Erro ao carregar usuários</td></tr>';
             } finally {
                 loadingUsers.style.display = 'none';
             }
         }
         
-        // Função para excluir usuário
+        // Excluir usuário
         async function deleteUser(userId) {
             if (!confirm('Tem certeza que deseja excluir este usuário?')) {
                 return;
@@ -734,30 +738,30 @@
             
             try {
                 await db.collection('users').doc(userId).delete();
-                successAlert.textContent = 'Usuário excluído com sucesso!';
-                successAlert.style.display = 'block';
+                showSuccess('Usuário excluído com sucesso!');
                 loadUsers();
             } catch (error) {
                 showError('Erro ao excluir usuário: ' + error.message);
             }
         }
         
-        // Função para hash de senha (simulada - em produção use uma solução adequada)
-        async function hashPassword(password) {
-            // Em um sistema real, use uma biblioteca como bcrypt no backend
-            // Esta é apenas uma simulação para demonstração
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hash))
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('');
+        // Funções de alerta
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successAlert.style.display = 'block';
+            setTimeout(hideAlerts, 5000);
         }
         
-        // Inicializar a lista de usuários quando a página carregar
-        document.addEventListener('DOMContentLoaded', function() {
-            loadUsers();
-        });
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            setTimeout(hideAlerts, 5000);
+        }
+        
+        function hideAlerts() {
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+        }
     </script>
 </body>
 </html>

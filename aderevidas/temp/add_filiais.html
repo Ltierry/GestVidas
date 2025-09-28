@@ -67,7 +67,7 @@
             margin-right: 15px;
         }
         
-        .logout-btn {
+        .logout-btn, .back-btn {
             background-color: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
@@ -75,71 +75,11 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-left: 10px;
         }
         
-        .logout-btn:hover {
+        .logout-btn:hover, .back-btn:hover {
             background-color: rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Menu de Navegação */
-        nav {
-            background-color: #2c3e50;
-            padding: 0 20px;
-        }
-        
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .menu {
-            list-style-type: none;
-            display: flex;
-        }
-        
-        .menu-item {
-            position: relative;
-        }
-        
-        .menu-item > a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 15px 20px;
-            transition: background-color 0.3s;
-        }
-        
-        .menu-item > a:hover {
-            background-color: #34495e;
-        }
-        
-        .dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            border-radius: 0 0 5px 5px;
-            display: none;
-            z-index: 10;
-        }
-        
-        .dropdown-item {
-            display: block;
-            padding: 12px 20px;
-            color: #333;
-            text-decoration: none;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.3s;
-        }
-        
-        .dropdown-item:hover {
-            background-color: #f0f0f0;
-        }
-        
-        .menu-item:hover .dropdown {
-            display: block;
         }
         
         /* Conteúdo Principal */
@@ -341,24 +281,9 @@
                 margin-bottom: 15px;
             }
             
-            .menu {
+            .user-info {
                 flex-direction: column;
-            }
-            
-            .dropdown {
-                position: static;
-                width: 100%;
-                display: none;
-                box-shadow: none;
-                border-radius: 0;
-            }
-            
-            .menu-item:hover .dropdown {
-                display: none;
-            }
-            
-            .menu-item.active .dropdown {
-                display: block;
+                margin-top: 15px;
             }
             
             .form-grid {
@@ -377,6 +302,15 @@
             .btn-secondary {
                 margin-right: 0;
             }
+            
+            .filiais-table {
+                font-size: 14px;
+            }
+            
+            .filiais-table th, 
+            .filiais-table td {
+                padding: 8px 10px;
+            }
         }
     </style>
 </head>
@@ -385,47 +319,15 @@
         <div class="header-content">
             <div class="logo-container">
                 <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
-                <div class="header-title">Igreja Adere Vidas</div>
+                <div class="header-title">Cadastro de Filiais - Igreja Adere Vidas</div>
             </div>
             <div class="user-info">
-                <span id="header-username">Bem-vindo, Administrador</span>
+                <span id="current-filial-info">Filial: Carregando...</span>
+                <button class="back-btn" onclick="window.location.href='main.html'"><i class="fas fa-arrow-left"></i> Voltar</button>
                 <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
             </div>
         </div>
     </header>
-    
-    <nav>
-        <div class="nav-container">
-            <ul class="menu">
-                <li class="menu-item">
-                    <a href="main.html"><i class="fas fa-home"></i> Início</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-church"></i> Ministérios</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-calendar-alt"></i> Eventos</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-users"></i> Membros</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-file-alt"></i> Relatórios</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-cogs"></i> Configurações</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-database"></i> Cadastro <i class="fas fa-chevron-down"></i></a>
-                    <div class="dropdown">
-                        <a href="add_usuario.html" class="dropdown-item"><i class="fas fa-user"></i> Usuário</a>
-                        <a href="perfil.html" class="dropdown-item"><i class="fas fa-id-card"></i> Perfil</a>
-                        <a href="add_filiais.html" class="dropdown-item"><i class="fas fa-church"></i> Filiais</a>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </nav>
     
     <div class="main-content">
         <h1 class="page-title">Cadastro de Filiais</h1>
@@ -542,6 +444,10 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
+        // Estado da aplicação
+        let currentFilial = null;
+        let currentUser = null;
+        
         // Elementos da interface
         const filialForm = document.getElementById('filial-form');
         const successAlert = document.getElementById('success-alert');
@@ -551,41 +457,78 @@
         const loading = document.getElementById('loading');
         const loadingFiliais = document.getElementById('loading-filiais');
         const filiaisList = document.getElementById('filiais-list');
-        const headerUsername = document.getElementById('header-username');
+        const currentFilialInfo = document.getElementById('current-filial-info');
         
-        // Verificar se o usuário está logado
-        let currentUser = null;
-        
+        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se há um usuário logado
+            // Verificar se o usuário está logado
             const userData = sessionStorage.getItem('user');
             
             if (!userData) {
-                // Redirecionar para login se não estiver logado
                 window.location.href = 'index.html';
                 return;
             }
             
             currentUser = JSON.parse(userData);
-            headerUsername.textContent = `Bem-vindo, ${currentUser.fullname}`;
-            loadFiliais();
-        });
-        
-        // Adicionar funcionalidade ao botão de logout
-        document.querySelector('.logout-btn').addEventListener('click', function() {
-            if(confirm('Deseja realmente sair do sistema?')) {
-                sessionStorage.removeItem('user');
-                window.location.href = 'index.html';
+            
+            // Obter a filial atual da URL ou localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const filialId = urlParams.get('filial') || localStorage.getItem('currentFilialId');
+            
+            if (filialId) {
+                loadFilialInfo(filialId);
+            } else {
+                currentFilialInfo.textContent = 'Filial: Não selecionada';
+                loadFiliais(); // Carregar filiais mesmo sem filial selecionada
             }
+            
+            // Configurar eventos
+            setupEventListeners();
         });
         
-        // Botão cancelar
-        document.getElementById('cancel-btn').addEventListener('click', function() {
-            filialForm.reset();
-        });
+        // Carregar informações da filial
+        async function loadFilialInfo(filialId) {
+            try {
+                const filialDoc = await db.collection('filiais').doc(filialId).get();
+                if (filialDoc.exists) {
+                    currentFilial = filialDoc.data();
+                    currentFilial.id = filialId;
+                    currentFilialInfo.textContent = `Filial: ${currentFilial.congregacao}`;
+                } else {
+                    currentFilialInfo.textContent = 'Filial: Não encontrada';
+                }
+                
+                // Carregar filiais após carregar a filial atual
+                loadFiliais();
+            } catch (error) {
+                console.error('Erro ao carregar informações da filial:', error);
+                currentFilialInfo.textContent = 'Filial: Erro ao carregar';
+                loadFiliais(); // Carregar filiais mesmo com erro
+            }
+        }
         
-        // Validar e enviar formulário
-        filialForm.addEventListener('submit', async function(e) {
+        // Configurar eventos
+        function setupEventListeners() {
+            // Logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if(confirm('Deseja realmente sair do sistema?')) {
+                    sessionStorage.removeItem('user');
+                    localStorage.removeItem('currentFilialId');
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            // Cancelar
+            document.getElementById('cancel-btn').addEventListener('click', function() {
+                filialForm.reset();
+            });
+            
+            // Formulário
+            filialForm.addEventListener('submit', handleFormSubmit);
+        }
+        
+        // Manipular envio do formulário
+        async function handleFormSubmit(e) {
             e.preventDefault();
             
             // Obter valores dos campos
@@ -599,8 +542,7 @@
             const endereco = document.getElementById('endereco').value.trim();
             
             // Esconder alertas
-            successAlert.style.display = 'none';
-            errorAlert.style.display = 'none';
+            hideAlerts();
             
             // Validar campos obrigatórios
             if (!congregacao || !tipo) {
@@ -608,7 +550,6 @@
                 return;
             }
             
-            // Mostrar loading
             loading.style.display = 'block';
             
             try {
@@ -636,37 +577,19 @@
                     createdBy: currentUser.id
                 });
                 
-                // Mostrar mensagem de sucesso
-                successMessage.textContent = 'Filial cadastrada com sucesso!';
-                successAlert.style.display = 'block';
-                
-                // Limpar formulário
+                showSuccess('Filial cadastrada com sucesso!');
                 filialForm.reset();
-                
-                // Atualizar lista de filiais
                 loadFiliais();
                 
-                // Rolar para o topo para ver a mensagem de sucesso
-                window.scrollTo(0, 0);
-                
             } catch (error) {
+                console.error('Erro ao cadastrar filial:', error);
                 showError(error.message);
             } finally {
-                // Esconder loading
                 loading.style.display = 'none';
             }
-        });
-        
-        // Função para exibir mensagem de erro
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorAlert.style.display = 'block';
-            
-            // Rolar para o topo para ver a mensagem de erro
-            window.scrollTo(0, 0);
         }
         
-        // Função para carregar filiais do Firestore
+        // Carregar filiais
         async function loadFiliais() {
             try {
                 loadingFiliais.style.display = 'block';
@@ -720,7 +643,7 @@
                     filiaisList.appendChild(row);
                 });
                 
-                // Adicionar event listeners para os botões de ação
+                // Event listeners para botões de ação
                 document.querySelectorAll('.action-btn.delete').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const filialId = this.getAttribute('data-id');
@@ -736,7 +659,7 @@
             }
         }
         
-        // Função para excluir filial
+        // Excluir filial
         async function deleteFilial(filialId) {
             if (!confirm('Tem certeza que deseja excluir esta filial?')) {
                 return;
@@ -744,12 +667,29 @@
             
             try {
                 await db.collection('filiais').doc(filialId).delete();
-                successMessage.textContent = 'Filial excluída com sucesso!';
-                successAlert.style.display = 'block';
+                showSuccess('Filial excluída com sucesso!');
                 loadFiliais();
             } catch (error) {
                 showError('Erro ao excluir filial: ' + error.message);
             }
+        }
+        
+        // Funções de alerta
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successAlert.style.display = 'block';
+            setTimeout(hideAlerts, 5000);
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            setTimeout(hideAlerts, 5000);
+        }
+        
+        function hideAlerts() {
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
         }
     </script>
 </body>

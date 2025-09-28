@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Saídas - Igreja Adere Vidas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header e Navegação */
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .header-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 15px;
+        }
+        
+        .caixa-info {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+        
+        .logout-btn, .back-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+        
+        .logout-btn:hover, .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Conteúdo Principal */
+        .main-content {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .page-title {
+            color: #1a2a6c;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card-title {
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #24378a, #c52d2d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+            margin-right: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        /* Tabela de saídas */
+        .saidas-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .saidas-table th, .saidas-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .saidas-table th {
+            background-color: #f8f9fa;
+            color: #1a2a6c;
+            font-weight: 600;
+        }
+        
+        .saidas-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pendente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-pago {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-cancelado {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #1a2a6c;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .action-btn.delete {
+            color: #b21f1f;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #1a2a6c;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                margin-top: 15px;
+            }
+            
+            .caixa-info {
+                margin: 10px 0;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .btn-secondary {
+                margin-right: 0;
+            }
+            
+            .saidas-table {
+                font-size: 14px;
+            }
+            
+            .saidas-table th, 
+            .saidas-table td {
+                padding: 8px 10px;
+            }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/Ng3DKmJK/logo-igreja.png" alt="Logo Igreja" class="logo">
+                <div class="header-title">Cadastro de Saídas - Igreja Adere Vidas</div>
+            </div>
+            <div class="user-info">
+                <span id="current-filial-info">Filial: Carregando...</span>
+                <div class="caixa-info" id="caixa-info">
+                    <i class="fas fa-wallet"></i> Caixa: R$ 0,00
+                </div>
+                <button class="back-btn" onclick="window.location.href='main.html'"><i class="fas fa-arrow-left"></i> Voltar</button>
+                <button class="logout-btn">Sair <i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <h1 class="page-title">Cadastro de Saídas</h1>
+        
+        <div class="alert alert-success" id="success-alert">
+            <i class="fas fa-check-circle"></i> <span id="success-message">Saída cadastrada com sucesso!</span>
+        </div>
+        
+        <div class="alert alert-error" id="error-alert">
+            <i class="fas fa-exclamation-circle"></i> <span id="error-message"></span>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Salvando saída...</p>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Nova Saída</h2>
+            <form id="saida-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="saida-descricao">Descrição *</label>
+                        <input type="text" id="saida-descricao" class="form-control" placeholder="Descrição da saída" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saida-valor">Valor *</label>
+                        <input type="number" id="saida-valor" class="form-control" placeholder="0,00" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saida-data">Data *</label>
+                        <input type="date" id="saida-data" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saida-competencia">Competência</label>
+                        <input type="text" id="saida-competencia" class="form-control" placeholder="MM/AAAA" maxlength="7">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saida-categoria">Categoria *</label>
+                        <select id="saida-categoria" class="form-control" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="manutencao">Manutenção</option>
+                            <option value="contas">Contas (Água, Luz, Telefone)</option>
+                            <option value="salarios">Salários e Encargos</option>
+                            <option value="aluguel">Aluguel</option>
+                            <option value="material">Material de Expediente</option>
+                            <option value="eventos">Eventos e Programações</option>
+                            <option value="missões">Missões e Obras Sociais</option>
+                            <option value="transportes">Transporte e Combustível</option>
+                            <option value="alimentacao">Alimentação</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saida-fornecedor">Fornecedor</label>
+                        <input type="text" id="saida-fornecedor" class="form-control" placeholder="Nome do fornecedor">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saida-documento">Nº Documento</label>
+                        <input type="text" id="saida-documento" class="form-control" placeholder="Número do documento">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="saida-status">Status *</label>
+                        <select id="saida-status" class="form-control" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="pago">Pago</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="saida-observacoes">Observações</label>
+                    <textarea id="saida-observacoes" class="form-control" placeholder="Observações adicionais" rows="3"></textarea>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Cadastrar Saída</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Saídas Cadastradas</h2>
+            <div class="loading" id="loading-saidas">
+                <div class="loading-spinner"></div>
+                <p>Carregando saídas...</p>
+            </div>
+            <table class="saidas-table">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th>Categoria</th>
+                        <th>Fornecedor</th>
+                        <th>Status</th>
+                        <th>Filial</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="saidas-list">
+                    <!-- As saídas serão carregadas aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Sistema de Gestão - Igreja Adere Vidas &copy; 2025</p>
+    </footer>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNmIm9kem9yKp9skGS2HKHwqaauK36aps",
+            authDomain: "dbaderevidas-9cbd0.firebaseapp.com",
+            projectId: "dbaderevidas-9cbd0",
+            storageBucket: "dbaderevidas-9cbd0.firebasestorage.app",
+            messagingSenderId: "762500930740",
+            appId: "1:762500930740:web:ff13ea2685e2db28ec0be1"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Estado da aplicação
+        let currentFilial = null;
+        let currentUser = null;
+        let caixaFilial = 0;
+        
+        // Elementos da interface
+        const saidaForm = document.getElementById('saida-form');
+        const descricaoInput = document.getElementById('saida-descricao');
+        const valorInput = document.getElementById('saida-valor');
+        const dataInput = document.getElementById('saida-data');
+        const competenciaInput = document.getElementById('saida-competencia');
+        const categoriaSelect = document.getElementById('saida-categoria');
+        const fornecedorInput = document.getElementById('saida-fornecedor');
+        const documentoInput = document.getElementById('saida-documento');
+        const statusSelect = document.getElementById('saida-status');
+        const observacoesInput = document.getElementById('saida-observacoes');
+        const successAlert = document.getElementById('success-alert');
+        const errorAlert = document.getElementById('error-alert');
+        const successMessage = document.getElementById('success-message');
+        const errorMessage = document.getElementById('error-message');
+        const saidasList = document.getElementById('saidas-list');
+        const loading = document.getElementById('loading');
+        const loadingSaidas = document.getElementById('loading-saidas');
+        const currentFilialInfo = document.getElementById('current-filial-info');
+        const caixaInfo = document.getElementById('caixa-info');
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se o usuário está logado
+            const userData = sessionStorage.getItem('user');
+            
+            if (!userData) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(userData);
+            
+            // Obter a filial atual da URL ou localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const filialId = urlParams.get('filial') || localStorage.getItem('currentFilialId');
+            
+            if (filialId) {
+                loadFilialInfo(filialId);
+            } else {
+                currentFilialInfo.textContent = 'Filial: Não selecionada';
+                showError('Selecione uma filial para visualizar as saídas.');
+            }
+            
+            // Configurar eventos
+            setupEventListeners();
+            
+            // Definir data atual como padrão
+            const hoje = new Date().toISOString().split('T')[0];
+            dataInput.value = hoje;
+        });
+        
+        // Carregar informações da filial
+        async function loadFilialInfo(filialId) {
+            try {
+                const filialDoc = await db.collection('filiais').doc(filialId).get();
+                if (filialDoc.exists) {
+                    currentFilial = filialDoc.data();
+                    currentFilial.id = filialId;
+                    currentFilialInfo.textContent = `Filial: ${currentFilial.congregacao}`;
+                    
+                    // Carregar saldo do caixa da filial
+                    await loadCaixaFilial();
+                    
+                    // Carregar saídas após ter a filial
+                    loadSaidas();
+                } else {
+                    currentFilialInfo.textContent = 'Filial: Não encontrada';
+                    showError('Filial não encontrada.');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar informações da filial:', error);
+                currentFilialInfo.textContent = 'Filial: Erro ao carregar';
+                showError('Erro ao carregar informações da filial.');
+            }
+        }
+        
+        // Carregar saldo do caixa da filial
+        async function loadCaixaFilial() {
+            try {
+                if (!currentFilial) return;
+                
+                // Buscar o documento de caixa da filial
+                const caixaDoc = await db.collection('caixa').doc(currentFilial.id).get();
+                
+                if (caixaDoc.exists) {
+                    const caixaData = caixaDoc.data();
+                    caixaFilial = caixaData.saldo || 0;
+                } else {
+                    // Se não existe, criar um documento de caixa para a filial
+                    await db.collection('caixa').doc(currentFilial.id).set({
+                        saldo: 0,
+                        filialId: currentFilial.id,
+                        filialNome: currentFilial.congregacao,
+                        ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    caixaFilial = 0;
+                }
+                
+                // Atualizar interface
+                atualizarDisplayCaixa();
+                
+            } catch (error) {
+                console.error('Erro ao carregar caixa da filial:', error);
+                showError('Erro ao carregar informações do caixa.');
+            }
+        }
+        
+        // Atualizar o saldo do caixa na interface
+        function atualizarDisplayCaixa() {
+            const saldoFormatado = new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(caixaFilial);
+            
+            caixaInfo.innerHTML = `<i class="fas fa-wallet"></i> Caixa: ${saldoFormatado}`;
+        }
+        
+        // Atualizar o saldo do caixa no Firestore
+        async function atualizarCaixaFilial(valor, tipo, descricao) {
+            try {
+                if (!currentFilial) return;
+                
+                // Atualizar o saldo local
+                caixaFilial += valor;
+                
+                // Atualizar no Firestore
+                await db.collection('caixa').doc(currentFilial.id).update({
+                    saldo: firebase.firestore.FieldValue.increment(valor),
+                    ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Registrar a transação no histórico
+                await db.collection('transacoes_caixa').add({
+                    tipo: tipo, // 'entrada' ou 'saida'
+                    valor: valor,
+                    descricao: descricao,
+                    filialId: currentFilial.id,
+                    filialNome: currentFilial.congregacao,
+                    data: firebase.firestore.FieldValue.serverTimestamp(),
+                    usuarioId: currentUser.id,
+                    usuarioNome: currentUser.fullname
+                });
+                
+                // Atualizar interface
+                atualizarDisplayCaixa();
+                
+            } catch (error) {
+                console.error('Erro ao atualizar caixa:', error);
+                // Reverter a alteração local em caso de erro
+                caixaFilial -= valor;
+                atualizarDisplayCaixa();
+                throw error;
+            }
+        }
+        
+        // Configurar eventos
+        function setupEventListeners() {
+            // Logout
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                if(confirm('Deseja realmente sair do sistema?')) {
+                    sessionStorage.removeItem('user');
+                    localStorage.removeItem('currentFilialId');
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            // Cancelar
+            document.getElementById('cancel-btn').addEventListener('click', function() {
+                saidaForm.reset();
+                // Definir data atual como padrão
+                const hoje = new Date().toISOString().split('T')[0];
+                dataInput.value = hoje;
+                statusSelect.value = 'pendente';
+            });
+            
+            // Formulário
+            saidaForm.addEventListener('submit', handleFormSubmit);
+            
+            // Formatador de competência
+            competenciaInput.addEventListener('input', function() {
+                formatarCompetencia(this);
+            });
+        }
+        
+        // Formatador e validador do campo competência
+        function formatarCompetencia(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d+)/, '$1/$2');
+            }
+            
+            if (value.length > 7) {
+                value = value.slice(0, 7);
+            }
+            
+            input.value = value;
+        }
+        
+        function validarCompetencia(competencia) {
+            if (!competencia) return true; // Campo não obrigatório
+            
+            const regex = /^(0[1-9]|1[0-2])\/\d{4}$/;
+            if (!regex.test(competencia)) {
+                return false;
+            }
+            
+            const [mes, ano] = competencia.split('/');
+            const mesNum = parseInt(mes, 10);
+            const anoNum = parseInt(ano, 10);
+            
+            const anoAtual = new Date().getFullYear();
+            return mesNum >= 1 && mesNum <= 12 && anoNum >= 2000 && anoNum <= anoAtual + 5;
+        }
+        
+        // Manipular envio do formulário
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            // Validar campos
+            const descricao = descricaoInput.value.trim();
+            const valor = parseFloat(valorInput.value);
+            const data = dataInput.value;
+            const competencia = competenciaInput.value.trim();
+            const categoria = categoriaSelect.value;
+            const fornecedor = fornecedorInput.value.trim();
+            const documento = documentoInput.value.trim();
+            const status = statusSelect.value;
+            const observacoes = observacoesInput.value.trim();
+            
+            // Esconder alertas
+            hideAlerts();
+            
+            // Validações
+            if (!descricao || isNaN(valor) || valor <= 0 || !data || !categoria || !status) {
+                showError('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            // Validar competência se preenchida
+            if (competencia && !validarCompetencia(competencia)) {
+                showError('Por favor, informe uma competência válida no formato MM/AAAA.');
+                return;
+            }
+            
+            if (!currentFilial) {
+                showError('Selecione uma filial para cadastrar a saída.');
+                return;
+            }
+            
+            // Verificar se há saldo suficiente apenas para saídas com status "pago"
+            if (status === 'pago' && valor > caixaFilial) {
+                showError('Saldo insuficiente no caixa para realizar esta saída.');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            try {
+                // Salvar saída no Firestore
+                await db.collection('saidas').add({
+                    descricao: descricao,
+                    valor: valor,
+                    data: data,
+                    competencia: competencia || '',
+                    categoria: categoria,
+                    fornecedor: fornecedor || '',
+                    documento: documento || '',
+                    status: status,
+                    observacoes: observacoes,
+                    tipo: 'saida',
+                    filialId: currentFilial.id,
+                    filialNome: currentFilial.congregacao,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: currentUser.id,
+                    createdByName: currentUser.fullname
+                });
+                
+                // Atualizar o caixa apenas se a saída estiver com status "pago"
+                if (status === 'pago') {
+                    await atualizarCaixaFilial(-valor, 'saida', `Saída: ${descricao}`);
+                }
+                
+                showSuccess('Saída cadastrada com sucesso!');
+                saidaForm.reset();
+                
+                // Definir data atual como padrão
+                const hoje = new Date().toISOString().split('T')[0];
+                dataInput.value = hoje;
+                statusSelect.value = 'pendente';
+                
+                loadSaidas();
+                
+            } catch (error) {
+                console.error('Erro ao cadastrar saída:', error);
+                showError('Erro ao cadastrar saída: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Carregar saídas
+        async function loadSaidas() {
+            try {
+                loadingSaidas.style.display = 'block';
+                saidasList.innerHTML = '';
+                
+                if (!currentFilial) {
+                    saidasList.innerHTML = '<tr><td colspan="8" style="text-align: center;">Selecione uma filial para visualizar as saídas</td></tr>';
+                    return;
+                }
+                
+                const saidasSnapshot = await db.collection('saidas')
+                    .where('filialId', '==', currentFilial.id)
+                    .orderBy('data', 'desc')
+                    .get();
+                
+                if (saidasSnapshot.empty) {
+                    saidasList.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhuma saída cadastrada</td></tr>';
+                    return;
+                }
+                
+                saidasSnapshot.forEach(doc => {
+                    const saida = doc.data();
+                    const row = document.createElement('tr');
+                    
+                    // Formatar valor para moeda brasileira
+                    const valorFormatado = new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(saida.valor);
+                    
+                    // Formatar data
+                    const dataFormatada = saida.data ? 
+                        new Date(saida.data).toLocaleDateString('pt-BR') : 
+                        'Data não disponível';
+                    
+                    // Status badge
+                    let statusClass = '';
+                    let statusText = '';
+                    switch(saida.status) {
+                        case 'pendente':
+                            statusClass = 'status-pendente';
+                            statusText = 'Pendente';
+                            break;
+                        case 'pago':
+                            statusClass = 'status-pago';
+                            statusText = 'Pago';
+                            break;
+                        case 'cancelado':
+                            statusClass = 'status-cancelado';
+                            statusText = 'Cancelado';
+                            break;
+                        default:
+                            statusClass = 'status-pendente';
+                            statusText = saida.status;
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${saida.descricao}</td>
+                        <td>${valorFormatado}</td>
+                        <td>${dataFormatada}</td>
+                        <td>${saida.categoria}</td>
+                        <td>${saida.fornecedor || '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${saida.filialNome}</td>
+                        <td>
+                            <button class="action-btn delete" data-id="${doc.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    
+                    saidasList.appendChild(row);
+                });
+                
+                // Event listeners para botões de ação
+                document.querySelectorAll('.action-btn.delete').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const saidaId = this.getAttribute('data-id');
+                        deleteSaida(saidaId);
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar saídas:', error);
+                saidasList.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #b21f1f;">Erro ao carregar saídas</td></tr>';
+            } finally {
+                loadingSaidas.style.display = 'none';
+            }
+        }
+        
+        // Excluir saída
+        async function deleteSaida(saidaId) {
+            if (!confirm('Tem certeza que deseja excluir esta saída?')) {
+                return;
+            }
+            
+            try {
+                // Obter dados da saída antes de excluir
+                const saidaDoc = await db.collection('saidas').doc(saidaId).get();
+                const saida = saidaDoc.data();
+                
+                // Excluir a saída
+                await db.collection('saidas').doc(saidaId).delete();
+                
+                // Se a saída estava com status "pago", reverter o valor no caixa
+                if (saida.status === 'pago') {
+                    await atualizarCaixaFilial(saida.valor, 'entrada', `Exclusão de saída: ${saida.descricao}`);
+                }
+                
+                showSuccess('Saída excluída com sucesso!');
+                loadSaidas();
+            } catch (error) {
+                showError('Erro ao excluir saída: ' + error.message);
+            }
+        }
+        
+        // Funções de alerta
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successAlert.style.display = 'block';
+            setTimeout(hideAlerts, 5000);
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            setTimeout(hideAlerts, 5000);
+        }
+        
+        function hideAlerts() {
+            successAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
